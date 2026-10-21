@@ -10,11 +10,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: operations console. Summary strip on top, live telemetry + route on the left, a sticky control rail on the right where changes are staged, priced and applied. */
+/* Layout: operations console for one AI Connect city block. Summary strip on top, tabs that mirror the City Block diagram (Overview, Underground, Inside, Outside) plus Costs on the left, and a sticky control rail on the right where changes are staged, priced and applied. */
 :root{
-  --bg:#eef2f6; --panel:#ffffff; --sunken:#f5f7fa; --ink:#0e1726; --ink-2:#465266; --muted:#748096; --line:#dbe2ea;
+  --bg:#eef2f6; --panel:#ffffff; --sunken:#f5f7fa; --ink:#0e1726; --ink-2:#465266; --muted:#748096; --line:#dbe2ea; --street:#e3e8ee; --block:#f7f9fb;
   --accent:#0d7480; --accent-ink:#ffffff; --accent-soft:#e1f1f2;
-  --s1:#2a78d6; --s1-soft:rgba(42,120,214,.16); --s2:#eb6834;
+  --google:#2a78d6; --google-soft:rgba(42,120,214,.16); --tenant:#eb6834; --lit:#1baf7a; --dark:#b9c3cf; --copper:#a5775a;
   --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
   --good-ink:#0a7a0a; --warn-ink:#8a5d00; --serious-ink:#b2491f; --crit-ink:#b02a2a;
   --seq0:#eef3fa; --seq1:#cde2fb; --seq2:#86b6ef; --seq3:#3987e5; --seq4:#1c5cab; --seq5:#0d366b;
@@ -24,30 +24,31 @@
   --r:10px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042;
+  --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042; --street:#1a2431; --block:#141d29;
   --accent:#3fb7c1; --accent-ink:#06191b; --accent-soft:#12303a;
-  --s1:#3987e5; --s1-soft:rgba(57,135,229,.22); --s2:#d95926;
+  --google:#3987e5; --google-soft:rgba(57,135,229,.22); --tenant:#d95926; --lit:#199e70; --dark:#4a5768; --copper:#b98a6c;
   --good-ink:#4fd04f; --warn-ink:#fab219; --serious-ink:#f09a76; --crit-ink:#f07070;
   --seq0:#152131; --seq1:#184f95; --seq2:#256abf; --seq3:#3987e5; --seq4:#86b6ef; --seq5:#cde2fb;
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042;
+  --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042; --street:#1a2431; --block:#141d29;
   --accent:#3fb7c1; --accent-ink:#06191b; --accent-soft:#12303a;
-  --s1:#3987e5; --s1-soft:rgba(57,135,229,.22); --s2:#d95926;
+  --google:#3987e5; --google-soft:rgba(57,135,229,.22); --tenant:#d95926; --lit:#199e70; --dark:#4a5768; --copper:#b98a6c;
   --good-ink:#4fd04f; --warn-ink:#fab219; --serious-ink:#f09a76; --crit-ink:#f07070;
   --seq0:#152131; --seq1:#184f95; --seq2:#256abf; --seq3:#3987e5; --seq4:#86b6ef; --seq5:#cde2fb;
   color-scheme:dark}
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
 .wrap{max-width:1440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:.005em}
-h2{font-size:19px}
+h2{font-size:19px} h3{font-size:16px}
 .eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
-.num{font-variant-numeric:tabular-nums}
 .mono{font-family:var(--mono)}
 button,select,input{font:inherit;color:inherit}
+a{color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* top bar */
@@ -63,9 +64,9 @@ button,select,input{font:inherit;color:inherit}
 .field label,.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
 select{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:7px 10px;max-width:100%}
 .live{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
-.live i{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(12,163,12,.5);animation:pulse 2s infinite}
-@keyframes pulse{70%{box-shadow:0 0 0 7px rgba(12,163,12,0)}100%{box-shadow:0 0 0 0 rgba(12,163,12,0)}}
-.proto{font-size:11.5px;color:var(--muted);width:100%}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--good);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(12,163,12,.5)}70%{box-shadow:0 0 0 7px rgba(12,163,12,0)}100%{box-shadow:0 0 0 0 rgba(12,163,12,0)}}
+.proto{font-size:11.5px;color:var(--muted);width:100%;margin:0}
 
 /* priorities */
 .prio{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,2.6fr) auto;gap:14px 24px;align-items:center}
@@ -83,7 +84,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .ring{width:64px;height:64px;flex:none}
 .fit .t{display:flex;flex-direction:column}
 .fit .t strong{font-family:var(--display);font-size:15px}
-.fit .t span{font-size:12px;color:var(--ink-2);max-width:20ch}
+.fit .t span{font-size:12px;color:var(--ink-2);max-width:22ch}
 
 /* KPI strip */
 .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
@@ -91,40 +92,136 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .kpi .val{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
 .kpi .val small{font-size:15px;font-weight:500;color:var(--ink-2);margin-left:3px}
 .kpi .foot{font-size:12px;color:var(--ink-2)}
-.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;padding:2px 8px 2px 6px;border-radius:999px;border:1px solid var(--line);width:max-content;max-width:100%}
-.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;padding:2px 8px 2px 6px;border-radius:999px;border:1px solid var(--line);width:max-content;max-width:100%;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
 .pill.good{color:var(--good-ink)} .pill.warn{color:var(--warn-ink)} .pill.serious{color:var(--serious-ink)} .pill.crit{color:var(--crit-ink)}
 .pill.good::before{background:var(--good)} .pill.warn::before{background:var(--warn)} .pill.serious::before{background:var(--serious)} .pill.crit::before{background:var(--crit)}
+
+/* tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tab{border:0;background:none;padding:9px 14px 10px;cursor:pointer;color:var(--ink-2);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.tab small{font-size:11px;color:var(--muted);font-weight:400}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 
 /* main grid */
 .main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
 .col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.view{display:flex;flex-direction:column;gap:16px;min-width:0}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
 .card-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 14px;margin-bottom:12px}
-.card-h p{margin:2px 0 0;color:var(--ink-2);font-size:13px}
-.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2)}
+.card-h p{margin:2px 0 0;color:var(--ink-2);font-size:13px;max-width:70ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--ink-2)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.sq{width:10px;height:10px;border-radius:2px;display:inline-block}
 .chartbox{position:relative;width:100%}
 .chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.scrollx{overflow-x:auto}
 .tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;box-shadow:0 6px 18px rgba(0,0,0,.12);white-space:nowrap;transform:translate(-50%,-100%);display:none;z-index:5}
 .tip b{font-family:var(--mono);font-weight:500}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 .axis{fill:var(--muted);font-family:var(--mono);font-size:10.5px}
 .gridl{stroke:var(--line);stroke-width:1}
 .annot{fill:var(--ink-2);font-size:11px;font-family:var(--body)}
-
-/* route */
-.route-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
 .mini{background:var(--sunken);border-radius:8px;padding:8px 10px;min-width:0}
 .mini .lbl{display:block}
 .mini b{font-family:var(--mono);font-weight:500;font-size:13px}
+.minis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.note{margin:8px 0 0;font-size:12.5px;color:var(--ink-2)}
+
+/* block map */
+.blockwrap{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px;align-items:start}
+.map .bk{fill:var(--block);stroke:var(--line)}
+.map .st{fill:var(--street)}
+.map .stname{fill:var(--muted);font:500 10px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.map .bld{fill:var(--panel);stroke:var(--ink-2);stroke-width:1}
+.map .filler{fill:var(--sunken);stroke:var(--line)}
+.map .co{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+.map .blbl{fill:var(--ink);font:600 11.5px var(--body)}
+.map .bsub{fill:var(--ink-2);font:400 10.5px var(--body)}
+.map .duct{stroke:var(--dark);stroke-width:7;stroke-linecap:round;fill:none;opacity:.55}
+.map .route{fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;cursor:pointer;transition:opacity .2s}
+.map .route.hit{stroke:transparent;stroke-width:16}
+.map.dim .route.vis:not(.on){opacity:.18}
+.map .vault{fill:var(--panel);stroke:var(--ink);stroke-width:1.5}
+.map .pole{fill:var(--lit);stroke:var(--panel);stroke-width:2}
+.map .badge{fill:var(--panel);stroke:var(--line)}
+.map .btxt{fill:var(--ink);font:500 10.5px var(--mono)}
+.trace{display:flex;flex-direction:column;gap:10px}
+.trace .ctr{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12.5px;counter-reset:s}
+.steps li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:6px;color:var(--ink-2)}
+.steps li::before{counter-increment:s;content:counter(s);font:500 11px var(--mono);color:var(--muted);text-align:right}
+.steps li.done{color:var(--ink)}
+.steps li.done::before{color:var(--accent)}
+
+/* strands */
+.strands{display:grid;grid-template-columns:86px repeat(12,minmax(0,1fr));gap:4px 3px;align-items:center;font-size:11px;min-width:460px}
+.strands .tube{display:flex;align-items:center;gap:6px;color:var(--ink-2);font-family:var(--mono)}
+.strands .tube i{width:12px;height:12px;border-radius:50%;border:1px solid var(--line);flex:none}
+.strand{height:20px;border-radius:3px;background:var(--dark);opacity:.55;position:relative}
+.strand.google{background:var(--google);opacity:1}
+.strand.tenant{background:var(--tenant);opacity:1}
+.strand.lit{background:var(--lit);opacity:1}
+.strand.reserved{background:transparent;opacity:1;box-shadow:inset 0 0 0 2px var(--google)}
+.strand.add{outline:2px dashed var(--accent);outline-offset:1px}
+.strand.drop{opacity:.35}
+.vaults{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.vcard{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.vcard .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bar{height:8px;background:var(--sunken);border-radius:4px;overflow:hidden;display:flex;gap:2px}
+.bar div{height:100%}
+.mh{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mh li{background:var(--sunken);border-radius:8px;padding:8px 10px;font-size:12px;display:flex;flex-direction:column;gap:4px}
+
+/* floors */
+.floors{display:flex;flex-direction:column;gap:4px;min-width:520px}
+.floor{display:grid;grid-template-columns:118px minmax(0,1fr) 150px;gap:12px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--panel);text-align:left;width:100%}
+.floor:hover{border-color:var(--ink-2)}
+.floor[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.floor .fl{display:flex;flex-direction:column}
+.floor .fl b{font-family:var(--display);font-size:15px;font-weight:600}
+.floor .fl span{font:500 11px var(--mono);color:var(--muted)}
+.floor .fm{font-size:12px;color:var(--ink-2);display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-align:right}
+.floor.under{background:var(--sunken)}
+.racks{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:2px}
+.rack{height:16px;border-radius:2px;background:var(--sunken);box-shadow:inset 0 0 0 1px var(--line)}
+.rack.google{background:var(--google);box-shadow:none}
+.rack.tenant{background:var(--tenant);box-shadow:none}
+.rack.burst{background:var(--google-soft);box-shadow:inset 0 0 0 1.5px var(--google)}
+.rack.add{box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
+.rack.drop{background:var(--google);opacity:.3}
+.fviz{font-size:12px;color:var(--ink-2)}
+.detail{margin-top:12px;padding:12px 14px;background:var(--sunken);border-radius:8px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px 20px}
+.detail p{margin:4px 0 0;font-size:13px;color:var(--ink-2)}
+.facts{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;font-size:12.5px;margin:0}
+.facts dt{color:var(--muted)} .facts dd{margin:0;font-family:var(--mono)}
+
+/* customers */
+.cust{display:flex;flex-direction:column}
+.crow{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.3fr) 70px minmax(0,1.5fr) 90px;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:12.5px}
+.crow:first-child{border-top:0;padding-top:0}
+.crow.head{color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:500;padding-bottom:6px}
+.crow b{font-weight:600;font-size:13px}
+.crow .sub{color:var(--muted);font-size:11.5px}
+.slabar{position:relative;height:8px;background:var(--sunken);border-radius:4px}
+.slabar div{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--google)}
+.slabar i{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink-2);right:0}
+.score{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.heatdest{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.hd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 80px;gap:10px;align-items:center;font-size:12.5px}
+.hd .v{font-family:var(--mono);text-align:right}
+.track{height:10px;background:var(--sunken);border-radius:0 4px 4px 0}
+.track div{height:100%;background:var(--tenant);border-radius:0 4px 4px 0}
 
 /* control rail */
 .rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 92px);display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 110px);overflow:auto;padding-bottom:2px}
 .ctl{display:flex;flex-direction:column;gap:14px}
-.group{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
-.group:first-child{border-top:0;padding-top:0}
+.sect{font-family:var(--display);font-weight:600;font-size:14px;color:var(--accent);letter-spacing:.02em;padding-top:14px;border-top:2px solid var(--line)}
+.sect:first-child{padding-top:0;border-top:0}
+.group{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid var(--line)}
+.sect+.group{border-top:0;padding-top:0}
 .group .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .group .hint{font-size:12px;color:var(--muted)}
 .stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:7px;overflow:hidden;width:max-content}
@@ -132,7 +229,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .stepper button:hover{background:var(--accent-soft)}
 .stepper output{min-width:46px;text-align:center;font-family:var(--mono);font-size:14px}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:7px;overflow:hidden}
-.seg button{border:0;border-left:1px solid var(--line);background:var(--panel);padding:7px 6px;font-size:12.5px;cursor:pointer}
+.seg button{border:0;border-left:1px solid var(--line);background:var(--panel);padding:7px 4px;font-size:12px;cursor:pointer}
 .seg button:first-child{border-left:0}
 .seg button:hover{background:var(--sunken)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:500}
@@ -146,7 +243,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .switch input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 .mix{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin:2px 0 4px}
 .mix div{height:100%}
-.mixrow{display:grid;grid-template-columns:92px minmax(0,1fr) 38px;gap:8px;align-items:center;font-size:12.5px}
+.mixrow{display:grid;grid-template-columns:96px minmax(0,1fr) 38px;gap:8px;align-items:center;font-size:12.5px}
 .mixrow .v{font-family:var(--mono);text-align:right}
 .dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px}
 
@@ -160,37 +257,34 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .delta{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0;padding:10px 12px;background:var(--sunken);border-radius:8px}
 .delta strong{font-family:var(--display);font-size:22px}
 .up{color:var(--serious-ink)} .down{color:var(--good-ink)}
-.btns{display:flex;gap:8px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
 .btn{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:8px 14px;cursor:pointer;font-weight:500}
 .btn:hover{border-color:var(--ink-2)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.primary:hover{filter:brightness(1.08)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:12.5px}
 .confirm{margin-top:10px;padding:10px 12px;border:1px dashed var(--accent);border-radius:8px;font-size:12.5px;display:flex;flex-direction:column;gap:8px}
-.empty{color:var(--muted);font-size:13px}
+.empty{color:var(--muted);font-size:13px;margin:0}
 
-/* recs */
 .recs{display:flex;flex-direction:column;gap:8px}
 .rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;align-items:center}
 .rec b{font-weight:600;font-size:13.5px}
 .rec p{margin:0;font-size:12.5px;color:var(--ink-2);grid-column:1}
 .rec .why{font-size:11.5px;color:var(--muted)}
-.rec .btn{grid-row:1/span 3;grid-column:2;padding:6px 11px;font-size:12.5px}
+.rec .btn{grid-row:1/span 3;grid-column:2}
 
-/* costs */
 .barlist{display:flex;flex-direction:column;gap:7px}
-.bl{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) 86px 70px;gap:10px;align-items:center;font-size:12.5px}
-.bl .track{height:12px;background:var(--sunken);border-radius:0 4px 4px 0;position:relative}
-.bl .fill{height:100%;background:var(--s1);border-radius:0 4px 4px 0}
+.bl{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 92px 74px;gap:10px;align-items:center;font-size:12.5px}
+.bl .track{height:12px}
+.bl .track div{background:var(--google)}
+.bl .track div.neg{background:var(--lit)}
 .bl .v{font-family:var(--mono);text-align:right}
 .bl .d{font-family:var(--mono);text-align:right;font-size:11.5px}
 .bl.total{border-top:1px solid var(--line);padding-top:8px;font-weight:600}
-.unit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
 
-/* maintenance */
-.heat{display:grid;grid-template-columns:44px repeat(24,minmax(0,1fr));gap:2px;font-family:var(--mono);font-size:10px;color:var(--muted)}
-.heat .c{aspect-ratio:1/1;max-width:100%;border-radius:2px;position:relative}
-.heat .c.win{outline:2px solid var(--s2);outline-offset:-1px;z-index:1}
+.heat{display:grid;grid-template-columns:44px repeat(24,minmax(0,1fr));gap:2px;font-family:var(--mono);font-size:10px;color:var(--muted);min-width:420px}
+.heat .c{aspect-ratio:1/1;max-width:100%;border-radius:2px}
+.heat .c.win{outline:2px solid var(--tenant);outline-offset:-1px}
 .heat .h{text-align:center}
 .tasks{display:flex;flex-direction:column;gap:8px;margin-top:12px}
 .task{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;padding:9px 12px;background:var(--sunken);border-radius:8px;font-size:12.5px}
@@ -201,8 +295,6 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .feed li{display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:12.5px}
 .feed li:first-child{border-top:0}
 .feed time{font-family:var(--mono);color:var(--muted);font-size:11.5px}
-.feed .pill{margin-bottom:3px}
-
 .log{list-style:none;margin:0;padding:0;font-size:12.5px;display:flex;flex-direction:column;gap:8px}
 .log li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px}
 .log time{color:var(--muted);font-family:var(--mono);font-size:11.5px;grid-column:1/-1}
@@ -217,42 +309,45 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   .prio{grid-template-columns:minmax(0,1fr) auto}
   .prio .sliders{grid-column:1/-1;grid-row:2}
 }
+@media (max-width:860px){.blockwrap{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:760px){
   .rail{grid-template-columns:minmax(0,1fr)}
-  .two{grid-template-columns:minmax(0,1fr)}
+  .two,.vaults,.detail{grid-template-columns:minmax(0,1fr)}
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sliders{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .route-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .bl{grid-template-columns:minmax(0,1fr) 78px 60px}
+  .minis,.mh{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .score{grid-template-columns:minmax(0,1fr)}
+  .bl{grid-template-columns:minmax(0,1fr) 84px 64px}
   .bl .track{grid-column:1/-1;grid-row:2}
-  .unit{grid-template-columns:minmax(0,1fr)}
+  .crow{grid-template-columns:minmax(0,1fr) 90px}
+  .crow > :nth-child(2),.crow > :nth-child(3),.crow > :nth-child(4){display:none}
   .top{position:static}
   .kpi .val{font-size:26px}
 }
-@media (max-width:480px){.prio{grid-template-columns:minmax(0,1fr)}.heat{grid-template-columns:30px repeat(24,minmax(0,1fr));font-size:8.5px}}
+@media (max-width:480px){.prio{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <span class="eyebrow">Verizon × Google · Dedicated dark fiber for AI workloads</span>
+      <span class="eyebrow">Verizon AI Connect · Edge site CO-07 · Google anchor tenant</span>
       <h1>AI Connect <span>Fiber Console</span></h1>
-      <span class="sub">Signed in as <b>Google Network Operations</b> · Account team: Verizon Business, 24/7</span>
+      <span class="sub">Signed in as <b>Google Network Operations</b> · Account team: Verizon Business, 24/7 · <a href="https://claude.ai/artifact/MFvpDoPeoRx11m5msAN9np?sk=mZi_xhjF91SrM85C5bAgSA" target="_blank" rel="noopener">See the City Block concept</a></span>
     </div>
     <div class="topctl">
       <div class="field">
-        <label for="routeSel">Route</label>
-        <select id="routeSel">
-          <option value="cbpr">Council Bluffs, IA ⇄ Pryor, OK · Live (v0)</option>
-          <option disabled>The Dalles, OR ⇄ Council Bluffs, IA · Planned 2028</option>
-          <option disabled>Ten partner-client strands · Planned 2029</option>
-          <option disabled>Coast-to-coast AI connector · Planned 2030</option>
+        <label for="siteSel">Edge site</label>
+        <select id="siteSel">
+          <option value="co07">CO-07 Midtown exchange · Live</option>
+          <option disabled>CO-12 Riverside exchange · Peer site, 2028</option>
+          <option disabled>Ten-site metro ring · 2029</option>
+          <option disabled>Coast-to-coast AI connector · 2030</option>
         </select>
       </div>
-      <span class="live" id="liveTag"><i></i><span id="clock">Live</span></span>
+      <span class="live"><i></i><span id="clock">Live</span></span>
     </div>
-    <p class="proto">MPD400 Yellow Team concept prototype. All telemetry and pricing are simulated for illustration; final pricing depends on the Google feasibility study.</p>
+    <p class="proto">MPD400 Yellow Team concept prototype. A former copper central office converted into an edge AI site, linked by dark fiber. All telemetry and pricing are simulated for illustration.</p>
   </header>
 
   <section class="prio" aria-labelledby="prioH">
@@ -267,76 +362,156 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     </div>
   </section>
 
-  <section class="kpis" id="kpis" aria-label="Live service summary"></section>
+  <section class="kpis" id="kpis" aria-label="Live site summary"></section>
 
   <div class="main">
     <div class="col">
-      <section class="card">
-        <div class="card-h">
-          <div><h2>Live throughput</h2><p>Primary route, last 2 minutes, sampled every 2 seconds</p></div>
-          <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Google traffic (Tbps)</span><span><i class="sw" style="background:var(--ink-2)"></i>Lit capacity</span><span><i class="sw" style="background:var(--s2)"></i>Burst trigger</span></div>
-        </div>
-        <div class="chartbox" id="liveBox"><svg id="liveSvg" viewBox="0 0 680 240" role="img" aria-label="Live throughput chart"></svg><div class="tip" id="liveTip"></div></div>
-      </section>
+      <nav class="tabs" role="tablist" aria-label="Console views">
+        <button class="tab" role="tab" id="tab-overview" data-tab="overview">Overview<small>The block at a glance</small></button>
+        <button class="tab" role="tab" id="tab-underground" data-tab="underground">Underground<small>Fiber, vaults, splices</small></button>
+        <button class="tab" role="tab" id="tab-inside" data-tab="inside">Inside<small>Floors, GPU halls, maintenance</small></button>
+        <button class="tab" role="tab" id="tab-outside" data-tab="outside">Outside<small>Customers and community</small></button>
+        <button class="tab" role="tab" id="tab-costs" data-tab="costs">Costs<small>Run-rate and unit costs</small></button>
+      </nav>
 
-      <section class="card">
-        <div class="card-h">
-          <div><h2>Route health</h2><p>Primary and diverse backup paths, with in-line amplifier (ILA) huts</p></div>
-          <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Primary · 640 km</span><span><i class="sw" style="background:var(--s2)"></i>Backup · 780 km</span></div>
-        </div>
-        <div class="chartbox" style="overflow-x:auto"><svg id="routeSvg" viewBox="0 0 680 210" role="img" aria-label="Route schematic" style="min-width:520px"></svg></div>
-        <div class="route-meta" id="routeMeta"></div>
-      </section>
-
-      <div class="two">
+      <!-- OVERVIEW -->
+      <div class="view" id="view-overview" role="tabpanel" aria-labelledby="tab-overview">
         <section class="card">
-          <div class="card-h"><div><h2>Capacity forecast</h2><p>Projected monthly peak vs. lit capacity</p></div></div>
-          <div class="chartbox" id="fcBox"><svg id="fcSvg" viewBox="0 0 420 230" role="img" aria-label="Capacity forecast chart"></svg><div class="tip" id="fcTip"></div></div>
-          <p class="annot" id="fcNote" style="margin:8px 0 0;font-size:12.5px"></p>
+          <div class="card-h">
+            <div><h2>CO-07 city block</h2><p>The converted central office sits in the middle. Fiber under the streets connects it to the customers around it, to Google's cloud region and to a peer edge site.</p></div>
+            <div class="legend"><span><i class="sw" style="background:var(--google)"></i>Google dark fiber</span><span><i class="sw" style="background:var(--tenant)"></i>Customer-lit dark fiber</span><span><i class="sw" style="background:var(--lit)"></i>Verizon lit fiber</span><span><i class="sw" style="background:var(--dark);height:6px"></i>Duct bank</span></div>
+          </div>
+          <div class="blockwrap">
+            <div class="chartbox scrollx"><svg id="mapSvg" class="map" viewBox="0 0 680 440" role="img" aria-label="Top-down map of the CO-07 city block" style="min-width:520px"></svg></div>
+            <div class="trace">
+              <div class="field"><label for="traceSel">Trace a request from</label><select id="traceSel"></select></div>
+              <div class="ctr">
+                <div class="mini"><span class="lbl">Fiber traveled</span><b id="trM">0 m</b></div>
+                <div class="mini"><span class="lbl">Light, one way</span><b id="trUs">0.0 µs</b></div>
+              </div>
+              <ol class="steps" id="trSteps"></ol>
+              <p class="note" id="trNote" style="margin:0"></p>
+              <button class="btn sm" id="trGo" type="button">Send a request</button>
+            </div>
+          </div>
         </section>
+
         <section class="card">
-          <div class="card-h"><div><h2>Recommended for your priorities</h2><p>Stage a change, then review its cost in the rail</p></div></div>
-          <div class="recs" id="recs"></div>
+          <div class="card-h">
+            <div><h2>Google GPU load</h2><p>Power drawn by Google's racks, last 2 minutes, sampled every 2 seconds</p></div>
+            <div class="legend"><span><i class="sw" style="background:var(--google)"></i>Load (MW)</span><span><i class="sw" style="background:var(--ink-2)"></i>Reserved power</span><span><i class="sw" style="background:var(--tenant)"></i>Burst trigger</span></div>
+          </div>
+          <div class="chartbox" id="liveBox"><svg id="liveSvg" viewBox="0 0 680 230" role="img" aria-label="Live GPU load chart"></svg><div class="tip" id="liveTip"></div></div>
+        </section>
+
+        <div class="two">
+          <section class="card">
+            <div class="card-h"><div><h2>Rack forecast</h2><p>Projected monthly peak demand vs. racks reserved</p></div></div>
+            <div class="chartbox"><svg id="fcSvg" viewBox="0 0 420 230" role="img" aria-label="Rack demand forecast"></svg><div class="tip" id="fcTip"></div></div>
+            <p class="note" id="fcNote"></p>
+          </section>
+          <section class="card">
+            <div class="card-h"><div><h2>Recommended for your priorities</h2><p>Stage a change, then review its cost in the rail</p></div></div>
+            <div class="recs" id="recs"></div>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="card-h"><div><h2>Alerts and notices</h2><p>What the Verizon site team has flagged</p></div></div>
+          <ul class="feed" id="feed"></ul>
         </section>
       </div>
 
-      <section class="card">
-        <div class="card-h">
-          <div><h2>Monthly cost</h2><p>Run-rate for the applied configuration; staged changes show as a difference</p></div>
-          <span class="pill" id="costPill"></span>
-        </div>
-        <div class="barlist" id="costList"></div>
-        <div class="unit" id="unitCosts"></div>
-      </section>
-
-      <section class="card">
-        <div class="card-h">
-          <div><h2>Maintenance around heavy workloads</h2><p>Predicted load for the next 7 days (% of lit capacity). Outlined cells are booked maintenance windows.</p></div>
-          <div class="legend" id="heatLegend"></div>
-        </div>
-        <div style="overflow-x:auto"><div class="heat" id="heat" style="min-width:420px"></div></div>
-        <div class="tasks" id="tasks"></div>
-      </section>
-
-      <div class="two">
+      <!-- UNDERGROUND -->
+      <div class="view" id="view-underground" role="tabpanel" aria-labelledby="tab-underground" hidden>
         <section class="card">
-          <div class="card-h"><div><h2>Predictive maintenance</h2><p>ILA Hut 6 amplifier, signal quality (OSNR) over 30 days</p></div></div>
-          <div class="chartbox" id="osnrBox"><svg id="osnrSvg" viewBox="0 0 420 170" role="img" aria-label="OSNR trend for ILA Hut 6"></svg><div class="tip" id="osnrTip"></div></div>
-          <p style="margin:8px 0 0;font-size:12.5px;color:var(--ink-2)" id="osnrNote"></p>
+          <div class="card-h"><div><h2>Two ways into the building</h2><p>Fiber enters CO-07 through cable vaults on different streets, so one cut can't isolate the site.</p></div><span id="entryPill"></span></div>
+          <div class="vaults" id="vaults"></div>
+          <h3 style="margin:16px 0 8px">Manholes and splice points</h3>
+          <ul class="mh" id="manholes"></ul>
+        </section>
+
+        <section class="card">
+          <div class="card-h">
+            <div><h2>Inside cable EV-1</h2><p>144 strands in 12 buffer tubes, colored per TIA-598. Single-mode glass, about 0.2 dB/km at 1550 nm.</p></div>
+            <div class="legend"><span><i class="sq" style="background:var(--google)"></i>Google, customer-lit</span><span><i class="sq" style="box-shadow:inset 0 0 0 2px var(--google)"></i>Reserved for Google</span><span><i class="sq" style="background:var(--tenant)"></i>Other customer-lit</span><span><i class="sq" style="background:var(--lit)"></i>Verizon lit</span><span><i class="sq" style="background:var(--dark);opacity:.55"></i>Dark, available</span></div>
+          </div>
+          <div class="scrollx"><div class="strands" id="strands"></div></div>
+          <div class="minis" id="strandStats" style="margin-top:12px"></div>
+          <div class="btns" style="margin-top:12px"><button class="btn sm" id="leasePair" type="button">Lease 2 more strands for the cloud interconnect</button></div>
+        </section>
+
+        <div class="two">
+          <section class="card">
+            <div class="card-h"><div><h2>Predicted splice repair</h2><p>Splice loss at Manhole M3, west path, over 30 days</p></div></div>
+            <div class="chartbox"><svg id="spliceSvg" viewBox="0 0 420 170" role="img" aria-label="Splice loss trend at Manhole M3"></svg><div class="tip" id="spliceTip"></div></div>
+            <p class="note" id="spliceNote"></p>
+          </section>
+          <section class="card">
+            <div class="card-h"><div><h2>Copper retirement</h2><p>Freeing conduit, floor space and power</p></div></div>
+            <div class="bar" style="height:14px"><div style="width:77%;background:var(--copper)"></div></div>
+            <p class="note"><b class="mono">1,840</b> of 2,400 copper pairs retired. Pulling copper freed two conduits for new fiber without opening the street.</p>
+            <div class="minis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px">
+              <div class="mini"><span class="lbl">Copper recycled</span><b>3.4 t</b></div>
+              <div class="mini"><span class="lbl">Conduits freed</span><b>2 of 6</b></div>
+              <div class="mini"><span class="lbl">Floor space freed</span><b>4 floors</b></div>
+              <div class="mini"><span class="lbl">Street openings</span><b>0</b></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- INSIDE -->
+      <div class="view" id="view-inside" role="tabpanel" aria-labelledby="tab-inside" hidden>
+        <section class="card">
+          <div class="card-h">
+            <div><h2>Floors of CO-07</h2><p>Kept: utility feeds, generators, hardened structure, conduit entrances. Removed: copper frames and switching gear. Added: GPU halls, liquid cooling, meet-me room, optical core.</p></div>
+            <div class="legend"><span><i class="sq" style="background:var(--google)"></i>Google rack</span><span><i class="sq" style="background:var(--google-soft);box-shadow:inset 0 0 0 1.5px var(--google)"></i>Burst rack</span><span><i class="sq" style="background:var(--tenant)"></i>Other tenant</span><span><i class="sq" style="background:var(--sunken);box-shadow:inset 0 0 0 1px var(--line)"></i>Open</span></div>
+          </div>
+          <div class="scrollx"><div class="floors" id="floors"></div></div>
+          <div class="detail" id="floorDetail"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-h">
+            <div><h2>Maintenance around heavy workloads</h2><p>Predicted Google GPU load for the next 7 days (% of reserved power). Outlined cells are booked maintenance windows.</p></div>
+            <div class="legend" id="heatLegend"></div>
+          </div>
+          <div class="scrollx"><div class="heat" id="heat"></div></div>
+          <div class="tasks" id="tasks"></div>
+        </section>
+      </div>
+
+      <!-- OUTSIDE -->
+      <div class="view" id="view-outside" role="tabpanel" aria-labelledby="tab-outside" hidden>
+        <section class="card">
+          <div class="card-h"><div><h2>Customers on the block</h2><p>Google Cloud edge customers whose requests reach Google's GPUs in CO-07. Bars show live round-trip latency against each SLA.</p></div></div>
+          <div class="cust" id="cust"></div>
         </section>
         <section class="card">
-          <div class="card-h"><div><h2>Alerts and notices</h2><p>What the account team has flagged</p></div></div>
-          <ul class="feed" id="feed"></ul>
+          <div class="card-h"><div><h2>Sustainability scorecard</h2><p>Published monthly for this site: energy efficiency, renewable share, water use and heat reused.</p></div><span class="pill good">Published Oct 1</span></div>
+          <div class="score" id="score"></div>
+          <h3 style="margin:16px 0 0">Where the heat goes</h3>
+          <div class="heatdest" id="heatdest"></div>
+          <p class="note" id="heatNote"></p>
+        </section>
+      </div>
+
+      <!-- COSTS -->
+      <div class="view" id="view-costs" role="tabpanel" aria-labelledby="tab-costs" hidden>
+        <section class="card">
+          <div class="card-h"><div><h2>Monthly cost</h2><p>Run-rate for the applied configuration. Staged changes show as a difference.</p></div><span class="pill" id="costPill"></span></div>
+          <div class="barlist" id="costList"></div>
+          <div class="minis" id="unitCosts" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px"></div>
         </section>
       </div>
     </div>
 
-    <aside class="rail" aria-label="Network settings">
+    <aside class="rail" aria-label="Site settings">
       <section class="card">
-        <div class="card-h"><div><h2>Network settings</h2><p>Changes are staged until you apply them</p></div></div>
+        <div class="card-h"><div><h2>Site settings</h2><p>Changes are staged until you apply them</p></div></div>
         <div class="ctl" id="ctl"></div>
       </section>
-
       <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
         <section class="card pending clean" id="pendCard">
           <div class="card-h"><div><h2>Staged changes</h2></div><span class="eyebrow" id="pendCount"></span></div>
@@ -355,354 +530,557 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <script>
 (function(){
 const $=s=>document.querySelector(s);
-const ROUTE={km:640,backupKm:780,huts:9};
-const DEFAULT={pairs:2,waves:48,rate:800,backup:'standby',enc:'customer',autoscale:true,scaleAt:85,support:'premium',maint:'lowload',cls:{training:60,inference:25,replication:15}};
+const $$=s=>Array.from(document.querySelectorAll(s));
+
+/* ---------- site model ---------- */
+const RACKS_TOTAL=120, HALL=24, OTHER_RACKS=36, MAX_GOOGLE=RACKS_TOTAL-OTHER_RACKS, SITE_MW=4.8, DCI_KM=40;
+const DEFAULT={racks:72,mode:'balanced',autoscale:true,scaleAt:85,heat:'reuse',gridShift:true,pairs:2,waves:48,rate:400,entry:'dual',peer:'standby',
+  cls:{realtime:35,imaging:25,enterprise:20,bulk:20},enc:'customer',support:'premium',maint:'lowload'};
+const MODE={performance:{n:'Performance',kw:40,lat:6.2},balanced:{n:'Balanced',kw:34,lat:7.0},eco:{n:'Eco',kw:28,lat:8.6}};
+const HEAT={dry:{n:'Dry coolers',pue:1.22,water:.04},reuse:{n:'Heat reuse',pue:1.24,water:.05},evap:{n:'Evaporative',pue:1.14,water:1.1}};
+const ENTRY={dual:{n:'Both active',c:9000},east:{n:'East primary',c:4000}};
+const PEER={off:{n:'Off',c:0},standby:{n:'Standby',c:12000},share:{n:'Load-share',c:21000}};
+const SUPPORT={standard:{n:'Standard',c:6000,mttr:8,desc:'Business hours, 8 h restore'},premium:{n:'Premium 24/7',c:18000,mttr:4,desc:'24/7 site team, 4 h restore'},onsite:{n:'On-site',c:34000,mttr:2,desc:'Crew on site, 2 h restore, repair before failure'}};
+const ENC={customer:{n:'Customer keys',c:3200,desc:'Google holds the keys (optical-layer encryption)'},verizon:{n:'Verizon keys',c:1500,desc:'Verizon manages keys in an HSM'},app:{n:'In-app only',c:0,desc:'Google encrypts above the optical layer'}};
+const MAINT={lowload:{n:'Lowest load',desc:'Auto-book the quietest 2-hour windows'},fixed:{n:'Sun 1–5 am',desc:'Fixed weekly window'},approve:{n:'Ask first',desc:'Hold each window for Google approval'}};
+const CLS=[['realtime','Real-time','var(--google)','Robotics, AV and 5G requests'],['imaging','Imaging','var(--tenant)','Hospital imaging AI'],['enterprise','Enterprise','var(--lit)','Office tower private AI'],['bulk','Bulk sync','var(--muted)','Model updates to the cloud region']];
+const AVAIL={'east-off':99.95,'east-standby':99.98,'east-share':99.99,'dual-off':99.99,'dual-standby':99.995,'dual-share':99.999};
+const availOf=c=>AVAIL[c.entry+'-'+c.peer];
+
 const PRESETS=[
-  ['training','AI training sync',{speed:5,resilience:4,cost:2,sustain:2}],
+  ['inference','Real-time inference',{speed:5,resilience:4,cost:2,sustain:3}],
   ['balanced','Balanced',{speed:3,resilience:3,cost:3,sustain:3}],
   ['cost','Lowest cost',{speed:2,resilience:3,cost:5,sustain:3}],
   ['resilience','Maximum uptime',{speed:3,resilience:5,cost:2,sustain:2}],
-  ['green','Sustainability',{speed:3,resilience:3,cost:3,sustain:5}]];
+  ['green','Greenest site',{speed:3,resilience:3,cost:3,sustain:5}]];
 const PRI_META=[['speed','Speed & headroom'],['resilience','Reliability'],['cost','Cost'],['sustain','Sustainability']];
 const LEVEL=['','Low','Some','Medium','High','Top'];
-const SUPPORT={standard:{n:'Standard',c:6000,mttr:8,desc:'Business hours, 8 h restore'},premium:{n:'Premium 24/7',c:18000,mttr:4,desc:'24/7 team, 4 h restore'},onsite:{n:'On-site',c:34000,mttr:2,desc:'On-site crews, 2 h restore, repair before failure'}};
-const ENC={customer:{n:'Customer keys',c:3200,desc:'Google holds the keys (L1 optical encryption)'},verizon:{n:'Verizon keys',c:1500,desc:'Verizon manages keys in HSM'},app:{n:'In-app only',c:0,desc:'Google encrypts above the optical layer'}};
-const BACKUP={none:{n:'Off',f:0,avail:99.95},standby:{n:'Standby',f:.55,avail:99.99},active:{n:'Active-active',f:1,avail:99.999}};
-const MAINT={lowload:{n:'Lowest load',desc:'Auto-book the quietest 2-hour windows'},fixed:{n:'Sunday 1–5 am',desc:'Fixed weekly window'},approve:{n:'Ask first',desc:'Hold each window for Google approval'}};
-const CLS=[['training','AI training sync','var(--s1)'],['inference','Inference serving','var(--s2)'],['replication','Storage replication','var(--muted)']];
 
 function load(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v?Object.assign(structuredClone(d),v):structuredClone(d)}catch(e){return structuredClone(d)}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-let applied=load('aic.cfg',DEFAULT);
+let applied=load('aic2.cfg',DEFAULT);
 let pend=structuredClone(applied);
-let pri=load('aic.pri',PRESETS[0][2]);
-let log=(()=>{try{return JSON.parse(localStorage.getItem('aic.log'))||null}catch(e){return null}})()||[
-  {t:'Oct 16, 09:42',who:'Google NetOps',what:'Raised wavelengths per pair 40 → 48',d:2900},
-  {t:'Oct 9, 14:10',who:'Verizon account team',what:'Turned on burst auto-scale at 85%',d:4000},
-  {t:'Oct 1, 08:00',who:'Verizon',what:'Primary route accepted into service',d:0}];
+let pri=load('aic2.pri',PRESETS[0][2]);
+let log=(()=>{try{return JSON.parse(localStorage.getItem('aic2.log'))||null}catch(e){return null}})()||[
+  {t:'Oct 17, 10:05',who:'Google NetOps',what:'Reserved racks 60 → 72 in GPU halls 3–5',d:21400},
+  {t:'Oct 12, 16:40',who:'Verizon site team',what:'Heat reuse loop connected to 5th Ave apartments',d:-6900},
+  {t:'Oct 1, 08:00',who:'Verizon',what:'CO-07 accepted into service as an edge AI site',d:0}];
 let confirming=false;
 
-const fmt$=n=>'$'+Math.round(n).toLocaleString('en-US');
-const fmtK=n=>'$'+(n/1000).toFixed(n>=100000?0:1)+'k';
+const fmt$=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
+const fmtK=n=>(n<0?'−':'')+'$'+(Math.abs(n)/1000).toFixed(Math.abs(n)>=100000?0:1)+'k';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const capOf=c=>c.pairs*c.waves*c.rate/1000;
+const kwOf=c=>MODE[c.mode].kw;
+const capMW=c=>c.racks*kwOf(c)/1000;
+const dciTbps=c=>c.pairs*c.waves*c.rate/1000;
 
-/* ---- demand model ---- */
-function diurnal(h){return .74+.2*Math.sin((h-9)/24*2*Math.PI)+.06*Math.sin((h-2)/12*2*Math.PI)}
-const BASE_PEAK=56; // Tbps today
-function predLoad(dayIdx,h,cfg){const dow=(new Date(Date.now()+dayIdx*864e5)).getDay();const wk=(dow===0||dow===6)?.86:1;return BASE_PEAK*diurnal(h)*wk*(1+dayIdx*.0015)/capOf(cfg)*100}
-function forecast(){const out=[];const d=new Date();for(let i=1;i<=12;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,1);out.push({m,label:m.toLocaleString('en-US',{month:'short'}),y:m.getFullYear(),peak:BASE_PEAK*Math.pow(1.042,i)})}return out}
+/* ---------- demand ---------- */
+function diurnal(h){return .72+.22*Math.sin((h-10)/24*2*Math.PI)+.06*Math.sin((h-3)/12*2*Math.PI)}
+const BASE_PEAK=47; // rack-equivalents of Google demand at today's peak
+function predLoad(dayIdx,h,cfg){const dow=(new Date(Date.now()+dayIdx*864e5)).getDay();const wk=(dow===0||dow===6)?.84:1;return BASE_PEAK*diurnal(h)*wk*(1+dayIdx*.0016)/cfg.racks*100}
+function forecast(){const out=[];const d=new Date();for(let i=1;i<=12;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,1);out.push({label:m.toLocaleString('en-US',{month:'short'}),y:m.getFullYear(),peak:BASE_PEAK*Math.pow(1.05,i)})}return out}
 
-/* ---- economics ---- */
+/* ---------- economics ---------- */
 function econ(c){
-  const lease=c.pairs*ROUTE.km*26;
-  const backup=c.pairs*ROUTE.backupKm*26*BACKUP[c.backup].f;
-  const huts=c.pairs*ROUTE.huts*650*(c.backup==='active'?1.8:1);
-  const burst=c.autoscale?4000:0;
-  const enc=ENC[c.enc].c;
-  const sup=SUPPORT[c.support].c;
-  const optics=c.pairs*c.waves*(c.rate===800?38:30);
-  const lines=[['Fiber lease, primary route',lease],['Diverse backup route',backup],['Amplifier huts & power',huts],['Optics maintenance',optics],['Support tier',sup],['Encryption key service',enc],['Burst capacity reserve',burst]];
+  const itKW=c.racks*kwOf(c)*.72;
+  const kwh=itKW*730*HEAT[c.heat].pue;
+  const energy=kwh*.105*(c.gridShift?.95:1);
+  const heatMWh=c.heat==='reuse'?itKW*730*.55/1000:0;
+  const lines=[
+    ['Rack space and cooling ('+c.racks+' racks)',c.racks*1500],
+    ['GPU power ('+MODE[c.mode].n.toLowerCase()+' mode)',energy],
+    ['Heat sold to district loop',-heatMWh*1000*.03],
+    ['Cloud interconnect, dark fiber lease',c.pairs*DCI_KM*180],
+    ['Optics maintenance',c.pairs*c.waves*(c.rate===800?38:30)],
+    ['Diverse building entry',ENTRY[c.entry].c],
+    ['Peer site CO-12 route',PEER[c.peer].c],
+    ['Meet-me room cross-connects (14)',14*350],
+    ['Support tier',SUPPORT[c.support].c],
+    ['Encryption key service',ENC[c.enc].c],
+    ['Burst rack reserve',c.autoscale?6000:0]];
   const total=lines.reduce((a,b)=>a+b[1],0);
-  const watts=c.pairs*c.waves*2*(c.rate===800?16:21)+c.pairs*ROUTE.huts*300*(c.backup==='active'?1.8:1);
-  const kwh=watts*730/1000;
-  const co2=kwh*.36/1000; // t
-  const avgTbps=BASE_PEAK*.74;
-  const pb=avgTbps*2.628e6/8/1000; // PB per month
-  return {lines,total,kwh,co2,pb,perPB:total/pb,gPerPB:co2*1e6/pb};
+  const renew=.62+(c.gridShift?.1:0);
+  const co2=kwh*.32*(1-renew)/1000;
+  const avoided=heatMWh*1000*.18/1000;
+  const water=itKW*730*HEAT[c.heat].water/1000;
+  const reqM=BASE_PEAK*.72*3000*2.628e6/1e6;
+  return {lines,total,itKW,kwh,renew,co2,avoided,water,heatMWh,pue:HEAT[c.heat].pue,perM:total/reqM,reqM};
 }
 function scores(c){
-  const cap=capOf(c);const fc=forecast();const peak6=fc[5].peak;
-  const head=1-peak6/cap;
-  const speed=clamp(Math.round((head+.05)/.4*100)+(c.rate===800?6:0),5,100);
-  const e=econ(c);const minCost=econ({...c,pairs:Math.max(1,Math.ceil(peak6/.85/(64*.8))),waves:64,rate:800,backup:'none',support:'standard',enc:'app',autoscale:false}).total;
-  const cost=clamp(Math.round(minCost/e.total*130),5,100);
-  const res=clamp({none:35,standby:72,active:92}[c.backup]+{standard:-6,premium:4,onsite:8}[c.support]+(c.autoscale?2:0),5,100);
-  const util=BASE_PEAK*.74/cap;
-  const sustain=clamp(Math.round(util*90+(c.rate===800?22:0)-(c.backup==='active'?8:0)),5,100);
+  const fc=forecast();const p6=fc[5].peak;const head=1-p6/c.racks;
+  const speed=clamp(Math.round((head+.05)/.4*100)+({performance:10,balanced:0,eco:-12}[c.mode])+(c.rate===800?4:0),5,100);
+  const need=Math.min(MAX_GOOGLE,Math.ceil(p6/.85/10)*10);
+  const minCost=econ({...c,racks:need,mode:'eco',heat:'reuse',gridShift:true,entry:'east',peer:'off',support:'standard',enc:'app',autoscale:false,pairs:1,waves:64,rate:800}).total;
+  const cost=clamp(Math.round(minCost/econ(c).total*125),5,100);
+  const res=clamp({99.95:35,99.98:55,99.99:68,99.995:84,99.999:94}[availOf(c)]+{standard:-6,premium:3,onsite:7}[c.support]+(c.autoscale?2:0),5,100);
+  const e=econ(c);
+  const sustain=clamp(Math.round((1.35-e.pue)/.21*45+e.renew*40+(c.heat==='reuse'?15:0)-(c.heat==='evap'?18:0)+({performance:-6,balanced:0,eco:6}[c.mode])),5,100);
   return {speed,cost,resilience:res,sustain};
 }
 function fit(c){const s=scores(c);let w=0,t=0;for(const[k] of PRI_META){w+=pri[k];t+=pri[k]*s[k]}return Math.round(t/w)}
 
-/* ---- priorities UI ---- */
+/* ---------- priorities ---------- */
 function renderPri(){
   $('#presets').innerHTML=PRESETS.map(([k,n,v])=>`<button class="chip" data-p="${k}" aria-pressed="${PRI_META.every(([m])=>v[m]===pri[m])}">${n}</button>`).join('');
   $('#sliders').innerHTML=PRI_META.map(([k,n])=>`<div class="sl"><div class="row"><b><label for="pri-${k}">${n}</label></b><span class="v">${LEVEL[pri[k]]}</span></div><input type="range" id="pri-${k}" min="1" max="5" step="1" value="${pri[k]}" data-k="${k}"></div>`).join('');
 }
-$('#presets').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;pri={...PRESETS.find(p=>p[0]===b.dataset.p)[2]};save('aic.pri',pri);renderPri();renderDerived()});
-$('#sliders').addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;pri[k]=+e.target.value;save('aic.pri',pri);e.target.previousElementSibling.querySelector('.v').textContent=LEVEL[pri[k]];
-  document.querySelectorAll('#presets .chip').forEach(c=>{const v=PRESETS.find(p=>p[0]===c.dataset.p)[2];c.setAttribute('aria-pressed',PRI_META.every(([m])=>v[m]===pri[m]))});renderDerived()});
+$('#presets').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;pri={...PRESETS.find(p=>p[0]===b.dataset.p)[2]};save('aic2.pri',pri);renderPri();renderDerived()});
+$('#sliders').addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;pri[k]=+e.target.value;save('aic2.pri',pri);e.target.previousElementSibling.querySelector('.v').textContent=LEVEL[pri[k]];
+  $$('#presets .chip').forEach(c=>{const v=PRESETS.find(p=>p[0]===c.dataset.p)[2];c.setAttribute('aria-pressed',PRI_META.every(([m])=>v[m]===pri[m]))});renderDerived()});
 function renderFit(){
-  const a=fit(applied),p=fit(pend),dirty=isDirty();
-  const r=26,C=2*Math.PI*r;
-  const arc=(v,col,dash)=>`<circle cx="32" cy="32" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C*v/100} ${C}" transform="rotate(-90 32 32)" ${dash?'opacity=".45"':''}/>`;
-  $('#fitRing').innerHTML=`<circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--line)" stroke-width="6"/>${dirty&&p>a?arc(p,'var(--accent)',1):''}${arc(dirty&&p<a?p:a,'var(--accent)')}<text x="32" y="37" text-anchor="middle" style="font:600 17px var(--display);fill:var(--ink)">${dirty?p:a}</text>`;
+  const a=fit(applied),p=fit(pend),dirty=isDirty();const r=26,C=2*Math.PI*r;
+  const arc=(v,dim)=>`<circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--accent)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C*v/100} ${C}" transform="rotate(-90 32 32)" ${dim?'opacity=".4"':''}/>`;
+  $('#fitRing').innerHTML=`<circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--line)" stroke-width="6"/>${dirty&&p>a?arc(p,1):''}${arc(dirty&&p<a?p:a)}<text x="32" y="37" text-anchor="middle" style="font:600 17px var(--display);fill:var(--ink)">${dirty?p:a}</text>`;
   const s=scores(dirty?pend:applied);const weakest=PRI_META.filter(([k])=>pri[k]>=3).sort((x,y)=>s[x[0]]-s[y[0]])[0];
   $('#fitText').textContent=(dirty?`Staged changes move this ${p>=a?'up':'down'} from ${a}. `:'')+(weakest?`Weakest area you care about: ${weakest[1].toLowerCase()} (${s[weakest[0]]}).`:'');
 }
 
-/* ---- live simulation ---- */
-const hist=[];let burstOn=false,overTicks=0,underTicks=0,burstTicks=0,spike=0;
-function effCap(){return capOf(applied)+(burstOn?applied.waves*applied.rate/1000:0)}
+/* ---------- live simulation ---------- */
+const hist=[];let burstOn=false,overTicks=0,underTicks=0,spike=0;
+const openRacks=c=>MAX_GOOGLE-c.racks;
+const burstRacks=c=>Math.min(12,openRacks(c));
+function effRacks(){return applied.racks+(burstOn?burstRacks(applied):0)}
 function sample(){
   const now=new Date();const h=now.getHours()+now.getMinutes()/60;
   if(spike<=0&&Math.random()<.04)spike=8+Math.floor(Math.random()*10);
-  const sp=spike>0?(spike--,BASE_PEAK*.16):0;
-  let d=BASE_PEAK*diurnal(h)*(1+(Math.random()-.5)*.05)+sp;
-  const cap=capOf(applied);
-  const util=d/effCap();
-  if(applied.autoscale){if(d/cap*100>applied.scaleAt){overTicks++;underTicks=0}else{underTicks++;overTicks=0}
-    if(!burstOn&&overTicks>=3){burstOn=true;pushFeed('warn','Burst pair lit','Traffic held above '+applied.scaleAt+'% for 6 s. A reserve fiber pair is carrying the overflow.')}
-    if(burstOn&&underTicks>=8){burstOn=false;pushFeed('good','Burst pair released','Load is back under the trigger. Reserve pair returned to dark.')}}
+  const sp=spike>0?(spike--,BASE_PEAK*.18):0;
+  const dem=BASE_PEAK*diurnal(h)*(1+(Math.random()-.5)*.05)+sp;
+  if(applied.autoscale&&burstRacks(applied)>0){if(dem/applied.racks*100>applied.scaleAt){overTicks++;underTicks=0}else{underTicks++;overTicks=0}
+    if(!burstOn&&overTicks>=3){burstOn=true;pushFeed('warn','Burst racks in use',`Load held above ${applied.scaleAt}% for 6 s. ${burstRacks(applied)} open racks in hall 6–7 are taking the overflow.`)}
+    if(burstOn&&underTicks>=8){burstOn=false;pushFeed('good','Burst racks released','Load is back under the trigger. Open racks returned to the shared pool.')}}
   else burstOn=false;
-  if(burstOn)burstTicks++;
-  const ec=effCap();const thr=Math.min(d,ec);const u=thr/ec;
-  const lat=3.21+(u>.82?(u-.82)*3.2:0)+Math.random()*.02;
-  const loss=d>ec?((d-ec)/d*100):(u>.93?.0008:.0001)*(1+Math.random());
-  hist.push({t:now,d:thr,demand:d,cap:ec,lat,loss});if(hist.length>60)hist.shift();
+  const er=effRacks();const used=Math.min(dem,er);const u=used/er;
+  const kw=kwOf(applied);
+  const lat=MODE[applied.mode].lat+(u>.82?(u-.82)*14:0)+Math.random()*.15;
+  hist.push({t:now,dem,used,u,mw:used*kw/1000,cap:er*kw/1000,lat,queued:dem>er});
+  if(hist.length>60)hist.shift();
 }
 let feedItems=[
-  {t:'08:14',k:'serious',s:'Predicted',title:'Hut 6 amplifier drifting',body:'Gain has dropped 0.4 dB in 14 days. A swap is booked in the next low-load window.'},
-  {t:'Yesterday',k:'good',s:'Resolved',title:'Splice loss cleared on Segment 3',body:'Restored in 1 h 12 min on backup route with no packet loss.'},
-  {t:'Oct 15',k:'warn',s:'Notice',title:'Last-mile build into Pryor campus',body:'Second building entrance is 3 weeks behind. Primary entrance is unaffected.'},
-  {t:'Oct 12',k:'good',s:'Report',title:'Weekly network report sent',body:'Availability 100.000%, median latency 3.22 ms, 0 security events.'}];
+  {t:'07:52',k:'serious',s:'Predicted',title:'Splice loss rising at Manhole M3',body:'West path splice is up 0.23 dB in 30 days. A re-splice is booked in a low-load window.'},
+  {t:'Yesterday',k:'good',s:'Done',title:'Hospital pair lit by customer optics',body:'The hospital installed its own optics on strands 2-1 and 2-2. Verizon maintains the glass.'},
+  {t:'Oct 15',k:'warn',s:'Notice',title:'Copper pull in conduit 3',body:'120 more copper pairs removed. No customer traffic in that conduit.'},
+  {t:'Oct 1',k:'good',s:'Report',title:'Sustainability scorecard published',body:'PUE 1.24, 72% renewable, 0.05 L of water per kWh.'}];
 function pushFeed(k,title,body){const t=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});feedItems.unshift({t,k,s:{good:'Resolved',warn:'Live',serious:'Watch',crit:'Critical'}[k],title,body});feedItems=feedItems.slice(0,6);renderFeed()}
 function renderFeed(){$('#feed').innerHTML=feedItems.map(f=>`<li><time>${f.t}</time><div><span class="pill ${f.k}">${f.s}</span><div><b>${f.title}</b></div><div style="color:var(--ink-2)">${f.body}</div></div></li>`).join('')}
-
 function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x)));const n=x/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
 
+/* ---------- KPIs ---------- */
 function renderKpis(){
   const last=hist[hist.length-1];if(!last)return;
-  const e=econ(applied);const u=last.d/last.cap*100;
-  const avail=BACKUP[applied.backup].avail;
-  const lat=last.lat, loss=last.loss;
+  const e=econ(applied);const u=last.u*100;
   const tile=(lbl,val,unit,pill,foot)=>`<div class="kpi"><span class="lbl">${lbl}</span><span class="val">${val}<small>${unit}</small></span>${pill}<span class="foot">${foot}</span></div>`;
   const pill=(k,t)=>`<span class="pill ${k}">${t}</span>`;
+  const entries=applied.entry==='dual'?'2 of 2':'1 + standby';
   $('#kpis').innerHTML=
-    tile('Throughput',last.d.toFixed(1),'Tbps',u>95?pill('crit','Saturated'):u>applied.scaleAt?pill('serious','Above trigger'):u>75?pill('warn','Busy'):pill('good','Headroom'),`${u.toFixed(0)}% of ${last.cap.toFixed(1)} Tbps lit${burstOn?' · burst on':''}`)+
-    tile('Latency, one-way',lat.toFixed(2),'ms',lat<=3.5?pill('good','Within SLA'):pill('serious','Over SLA'),'SLA ≤ 3.50 ms · 640 km path')+
-    tile('Packet loss',loss<.01?loss.toFixed(4):loss.toFixed(2),'%',loss<.001?pill('good','Clean'):loss<.1?pill('warn','Elevated'):pill('crit','Dropping'),'Target < 0.001%')+
-    tile('Availability, 30 day','100.000','%',pill('good','Meets SLA'),`Committed ${avail}% · backup ${BACKUP[applied.backup].n.toLowerCase()}`)+
-    tile('Monthly run-rate',fmtK(e.total),'',isDirty()?pill('warn','Changes staged'):pill('good','Applied'),`${fmt$(e.perPB)} per PB moved`)+
-    tile('Carbon',e.co2.toFixed(2),'t CO₂e/mo',e.gPerPB<200?pill('good','Low'):pill('warn','Moderate'),`${e.kwh.toLocaleString('en-US',{maximumFractionDigits:0})} kWh · ${Math.round(e.gPerPB)} kg per PB`.replace(' kg',' g'));
+    tile('Google GPU load',last.mw.toFixed(2),'MW',last.queued?pill('crit','Queueing'):u>applied.scaleAt?pill('serious','Above trigger'):u>75?pill('warn','Busy'):pill('good','Headroom'),`${u.toFixed(0)}% of ${effRacks()} racks${burstOn?' · burst on':''}`)+
+    tile('Request latency p50',last.lat.toFixed(1),'ms',last.lat<=9?pill('good','Within SLA'):pill('serious','Over SLA'),'Block customers, compute + fiber')+
+    tile('Fiber entries',entries,'',applied.entry==='dual'?pill('good','Diverse'):pill('warn','Single active'),'East · Main St / West · 5th Ave')+
+    tile('Availability, 30 day','100.000','%',pill('good','Meets SLA'),`Committed ${availOf(applied)}%`)+
+    tile('Monthly run-rate',fmtK(e.total),'',isDirty()?pill('warn','Changes staged'):pill('good','Applied'),`$${e.perM.toFixed(2)} per million requests`)+
+    tile('Energy efficiency',e.pue.toFixed(2),'PUE',e.pue<=1.25?pill('good','Efficient'):pill('warn','Watch'),`${Math.round(e.renew*100)}% renewable · ${e.heatMWh?Math.round(e.heatMWh)+' MWh heat reused':'no heat reuse'}`);
 }
 
-function renderLive(){
-  const W=680,H=240,L=44,R=74,T=12,B=26,pw=W-L-R,ph=H-T-B;
-  if(!hist.length)return;
-  const capNow=capOf(applied);
-  const max=Math.max(capNow*1.12,...hist.map(p=>Math.max(p.demand,p.cap)*1.05));
-  const step=niceStep(max/4);const ymax=Math.ceil(max/step)*step;
-  const x=i=>L+pw*(i/(59));const y=v=>T+ph*(1-v/ymax);
-  const off=60-hist.length;
-  let g='';for(let v=0;v<=ymax+1e-9;v+=step){g+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${v}</text>`}
-  const pts=hist.map((p,i)=>[x(i+off),y(p.d)]);
-  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
-  const area=line+` L${pts[pts.length-1][0]} ${y(0)} L${pts[0][0]} ${y(0)} Z`;
-  const capPath=hist.map((p,i)=>(i?'L':'M')+x(i+off).toFixed(1)+' '+y(p.cap).toFixed(1)).join(' ');
-  const trig=y(capNow*applied.scaleAt/100);
-  const lp=pts[pts.length-1],lc=hist[hist.length-1];
-  const xt=[0,20,40,59].map(i=>`<text class="axis" x="${x(i)}" y="${H-8}" text-anchor="${i===0?'start':i===59?'end':'middle'}">${i===59?'now':'−'+((59-i)*2)+'s'}</text>`).join('');
-  $('#liveSvg').innerHTML=`${g}${xt}
-   <path d="${area}" fill="var(--s1-soft)"/>
-   ${applied.autoscale?`<line x1="${L}" x2="${L+pw}" y1="${trig}" y2="${trig}" stroke="var(--s2)" stroke-width="1.5" stroke-dasharray="4 4"/><text class="annot" x="${L+pw+6}" y="${trig+4}">${applied.scaleAt}% trigger</text>`:''}
-   <path d="${capPath}" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="1 0"/>
-   <text class="annot" x="${L+pw+6}" y="${y(lc.cap)+4}">${lc.cap.toFixed(1)} lit</text>
-   <path d="${line}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
-   <circle cx="${lp[0]}" cy="${lp[1]}" r="4.5" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>
-   <text x="${L+pw+6}" y="${Math.min(H-B,Math.max(T+10,lp[1]+4+(Math.abs(lp[1]-y(lc.cap))<14?14:0)))}" style="font:600 12px var(--mono);fill:var(--ink)">${lc.d.toFixed(1)}</text>
-   <g id="liveHover"></g><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="liveHit"/>`;
-  bindHover('#liveSvg','#liveHit','#liveTip','#liveHover',W,(px)=>{const i=Math.round((px-L)/pw*59)-off;const p=hist[clamp(i,0,hist.length-1)];const xi=x(clamp(i,0,hist.length-1)+off);
-    return {x:xi,y:y(p.d),html:`<div>${p.t.toLocaleTimeString('en-US',{hour12:false})}</div><div>Traffic <b>${p.d.toFixed(1)} Tbps</b></div><div>Capacity <b>${p.cap.toFixed(1)}</b> · Latency <b>${p.lat.toFixed(2)} ms</b></div>`,g:`<line x1="${xi}" x2="${xi}" y1="${T}" y2="${T+ph}" stroke="var(--muted)" stroke-width="1"/><circle cx="${xi}" cy="${y(p.d)}" r="4" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>`}});
-}
+/* ---------- live chart ---------- */
 const hoverState={};
 function bindHover(svgSel,hitSel,tipSel,gSel,W,fn){
-  const svg=$(svgSel),hit=$(hitSel),tip=$(tipSel);
-  const show=ev=>{const r=svg.getBoundingClientRect();const px=(ev.clientX-r.left)/r.width*W;hoverState[svgSel]=px;draw(px)};
+  const svg=$(svgSel),hit=$(hitSel),tip=$(tipSel);if(!hit)return;
   const draw=px=>{const o=fn(px);if(!o)return;$(gSel).innerHTML=o.g;const r=svg.getBoundingClientRect();const box=svg.parentElement.getBoundingClientRect();tip.innerHTML=o.html;tip.style.display='block';
-    const vb=svg.viewBox.baseVal;const sx=r.width/vb.width;tip.style.left=clamp(o.x*sx+(r.left-box.left),70,box.width-70)+'px';tip.style.top=(o.y*(r.height/vb.height)+(r.top-box.top)-10)+'px'};
-  hit.addEventListener('pointermove',show);
+    const vb=svg.viewBox.baseVal;tip.style.left=clamp(o.x*(r.width/vb.width)+(r.left-box.left),70,box.width-70)+'px';tip.style.top=(o.y*(r.height/vb.height)+(r.top-box.top)-10)+'px'};
+  hit.addEventListener('pointermove',ev=>{const r=svg.getBoundingClientRect();const px=(ev.clientX-r.left)/r.width*W;hoverState[svgSel]=px;draw(px)});
   hit.addEventListener('pointerleave',()=>{hoverState[svgSel]=null;tip.style.display='none';$(gSel).innerHTML=''});
   if(hoverState[svgSel]!=null)draw(hoverState[svgSel]);
 }
-
-/* ---- route ---- */
-function renderRoute(){
-  const st=(i)=>i===5?'var(--serious)':'var(--good)';
-  const px=[40,108,176,244,312,380,448,516,584,640];
-  let s=`<text class="annot" x="40" y="22" text-anchor="start" style="font-weight:600;fill:var(--ink)">Council Bluffs, IA</text><text class="annot" x="640" y="22" text-anchor="end" style="font-weight:600;fill:var(--ink)">Pryor, OK</text>`;
-  s+=`<path d="M40 70 L640 70" stroke="var(--s1)" stroke-width="4" fill="none"/>`;
-  const bOpacity=applied.backup==='none'?.3:1;
-  s+=`<path d="M40 70 C 60 150, 120 150, 160 150 L 520 150 C 560 150, 620 150, 640 70" stroke="var(--s2)" stroke-width="3" fill="none" stroke-dasharray="${applied.backup==='standby'?'6 5':applied.backup==='none'?'2 6':'0'}" opacity="${bOpacity}"/>`;
-  for(let i=1;i<=ROUTE.huts;i++){const xx=px[i-1]+ (px[i]-px[i-1])/2+ (i===1?0:0);}
-  for(let i=1;i<=ROUTE.huts;i++){const xx=40+600*i/(ROUTE.huts+1);
-    s+=`<g><title>ILA Hut ${i}${i===6?' · amplifier gain drifting, swap booked':' · healthy'}</title><rect x="${xx-7}" y="63" width="14" height="14" rx="3" fill="var(--panel)" stroke="${st(i)}" stroke-width="2.5"/><text class="axis" x="${xx}" y="96" text-anchor="middle">H${i}</text></g>`}
-  s+=`<circle cx="40" cy="70" r="9" fill="var(--accent)" stroke="var(--panel)" stroke-width="3"/><circle cx="640" cy="70" r="9" fill="var(--accent)" stroke="var(--panel)" stroke-width="3"/>`;
-  s+=`<text class="axis" x="340" y="168" text-anchor="middle">Backup via Lincoln · Wichita · Tulsa — ${BACKUP[applied.backup].n.toLowerCase()}</text>`;
-  const xx6=40+600*6/(ROUTE.huts+1);
-  s+=`<line x1="${xx6}" y1="56" x2="${xx6}" y2="40" stroke="var(--serious)" stroke-width="1.5"/><text class="annot" x="${xx6}" y="35" text-anchor="middle">Hut 6 · gain −0.4 dB</text>`;
-  s+=`<text class="annot" x="620" y="198" text-anchor="end">Last mile into Pryor campus: entrance B delayed 3 wks</text><line x1="625" y1="194" x2="636" y2="82" stroke="var(--warn)" stroke-width="1.2" stroke-dasharray="2 3"/>`;
-  $('#routeSvg').innerHTML=s;
-  const c=applied;
-  $('#routeMeta').innerHTML=[['Lit fiber pairs',`${c.pairs} of 8 leased`],['Wavelengths',`${c.waves} × ${c.rate}G`],['Encryption',ENC[c.enc].n],['Restore commitment',`${SUPPORT[c.support].mttr} h · ${SUPPORT[c.support].n}`]].map(([a,b])=>`<div class="mini"><span class="lbl">${a}</span><b>${b}</b></div>`).join('');
+function renderLive(){
+  if(currentTab!=='overview'||!hist.length)return;
+  const W=680,H=230,L=44,R=78,T=12,B=26,pw=W-L-R,ph=H-T-B;
+  const capNow=capMW(applied);
+  const max=Math.max(capNow*1.12,...hist.map(p=>Math.max(p.dem*kwOf(applied)/1000,p.cap)*1.05));
+  const step=niceStep(max/4);const ymax=Math.ceil(max/step)*step;
+  const x=i=>L+pw*(i/59);const y=v=>T+ph*(1-v/ymax);const off=60-hist.length;
+  let g='';for(let v=0;v<=ymax+1e-9;v+=step){g+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${+v.toFixed(2)}</text>`}
+  const pts=hist.map((p,i)=>[x(i+off),y(p.mw)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=line+` L${pts[pts.length-1][0]} ${y(0)} L${pts[0][0]} ${y(0)} Z`;
+  const capPath=hist.map((p,i)=>(i?'L':'M')+x(i+off).toFixed(1)+' '+y(p.cap).toFixed(1)).join(' ');
+  const trig=y(capNow*applied.scaleAt/100);const lp=pts[pts.length-1],lc=hist[hist.length-1];
+  const xt=[0,20,40,59].map(i=>`<text class="axis" x="${x(i)}" y="${H-8}" text-anchor="${i===0?'start':i===59?'end':'middle'}">${i===59?'now':'−'+((59-i)*2)+'s'}</text>`).join('');
+  const capLblY=y(lc.cap)+4, endY=Math.min(H-B,Math.max(T+10,lp[1]+4+(Math.abs(lp[1]-y(lc.cap))<14?14:0)+(Math.abs(lp[1]-trig)<14&&applied.autoscale?14:0)));
+  $('#liveSvg').innerHTML=`${g}${xt}<path d="${area}" fill="var(--google-soft)"/>
+   ${applied.autoscale?`<line x1="${L}" x2="${L+pw}" y1="${trig}" y2="${trig}" stroke="var(--tenant)" stroke-width="1.5" stroke-dasharray="4 4"/><text class="annot" x="${L+pw+6}" y="${trig+4}">${applied.scaleAt}% trigger</text>`:''}
+   <path d="${capPath}" fill="none" stroke="var(--ink-2)" stroke-width="2"/><text class="annot" x="${L+pw+6}" y="${Math.abs(capLblY-trig)<12?capLblY-8:capLblY}">${lc.cap.toFixed(2)} cap</text>
+   <path d="${line}" fill="none" stroke="var(--google)" stroke-width="2" stroke-linejoin="round"/>
+   <circle cx="${lp[0]}" cy="${lp[1]}" r="4.5" fill="var(--google)" stroke="var(--panel)" stroke-width="2"/>
+   <text x="${L+pw+6}" y="${endY}" style="font:600 12px var(--mono);fill:var(--ink)">${lc.mw.toFixed(2)}</text>
+   <g id="liveHover"></g><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="liveHit"/>`;
+  bindHover('#liveSvg','#liveHit','#liveTip','#liveHover',W,px=>{const i=clamp(Math.round((px-L)/pw*59)-off,0,hist.length-1);const p=hist[i];const xi=x(i+off);
+    return {x:xi,y:y(p.mw),html:`<div>${p.t.toLocaleTimeString('en-US',{hour12:false})}</div><div>Load <b>${p.mw.toFixed(2)} MW</b> · ${(p.u*100).toFixed(0)}%</div><div>Latency p50 <b>${p.lat.toFixed(1)} ms</b></div>`,g:`<line x1="${xi}" x2="${xi}" y1="${T}" y2="${T+ph}" stroke="var(--muted)"/><circle cx="${xi}" cy="${y(p.mw)}" r="4" fill="var(--google)" stroke="var(--panel)" stroke-width="2"/>`}});
 }
 
-/* ---- forecast ---- */
+/* ---------- block map + trace ---------- */
+const ROUTES={
+  hospital:{name:'Hospital imaging AI',svc:'Customer-lit dark fiber pair',col:'var(--tenant)',vault:'East',m:480,base:18.4,sla:25,gbps:38,
+    pts:[[560,140],[560,155],[450,155],[450,222],[400,222]],node:[560,92],
+    steps:['Scanner sends the image over the hospital\'s own dark fiber pair','Splice at Manhole M1 joins the street duct bank','Enters through the east cable vault','Cross-connect in the meet-me room','GPU hall runs the model and returns the result'],
+    note:'The model\'s compute time dominates. Fiber adds about 2 µs each way.'},
+  depot:{name:'Robot / AV depot',svc:'Lit 100G Ethernet',col:'var(--lit)',vault:'West',m:560,base:6.1,sla:10,gbps:22,
+    pts:[[120,310],[120,295],[230,295],[230,238],[280,238]],node:[120,358],
+    steps:['Vehicle camera data leaves the depot','Runs under 5th Ave in the duct bank','Enters through the west vault, a separate path from the east','Meet-me room cross-connect','GPUs return a driving decision'],
+    note:'If the west path is cut, traffic shifts to the east entry.'},
+  cell:{name:'Phones on 5G small cells',svc:'Lit fronthaul, 14 poles',col:'var(--lit)',vault:'East',m:310,base:11.8,sla:20,gbps:41,
+    pts:[[450,62],[450,208],[400,208]],node:[450,62],
+    steps:['Phone reaches the small cell on the lamppost','Fiber drops from the pole into the street duct','East cable vault','Meet-me room','GPU answers the request'],
+    note:'The radio link adds a few milliseconds. The fiber leg adds microseconds.'},
+  office:{name:'Office tower enterprise AI',svc:'Lit 100G Ethernet',col:'var(--lit)',vault:'West',m:430,base:4.2,sla:8,gbps:17,
+    pts:[[120,140],[120,155],[230,155],[230,212],[280,212]],node:[120,92],
+    steps:['Enterprise app calls its private AI cluster','Lit Ethernet under Pine St','West cable vault','Meet-me room cross-connect to the private cage','Answer returns with no public internet in the path'],
+    note:'Dedicated bandwidth. Traffic never touches the public internet.'},
+  cloud:{name:'Google cloud interconnect',svc:'Google dark fiber (DCI)',col:'var(--google)',vault:'East',m:40000,base:.39,sla:1,gbps:0,
+    pts:[[400,232],[450,232],[450,295],[662,295]],node:[662,295],
+    steps:['GPUs send model updates and logs','Optical core puts them on DWDM wavelengths','Leaves through the east vault','About 40 km of long-haul fiber to Google\'s cloud region'],
+    note:'Bulk data travels farther. Time-sensitive requests stay on the block.'},
+  peer:{name:'Peer edge site CO-12',svc:'Verizon lit 400G',col:'var(--lit)',vault:'West',m:6000,base:.06,sla:1,gbps:0,
+    pts:[[280,250],[230,250],[230,432]],node:[230,432],
+    steps:['Optical core sends failover or shared work','Leaves through the west vault','6 km across town to CO-12'],
+    note:'Lets traffic fail over between sites and share work.'}};
+const ROUTE_ORDER=['hospital','depot','cell','office','cloud','peer'];
+let traceKey='hospital';
+const pathD=pts=>pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
+function liveLat(k){const r=ROUTES[k];if(k==='cloud'||k==='peer')return r.base;return r.base+(MODE[applied.mode].lat-7.0)+(hist.length?Math.max(0,hist[hist.length-1].lat-MODE[applied.mode].lat):0)}
+function renderMap(){
+  const blocks=[[30,30],[250,30],[470,30],[30,170],[250,170],[470,170],[30,310],[250,310],[470,310]];
+  let s=`<rect x="0" y="0" width="680" height="440" fill="var(--street)" rx="8"/>`;
+  blocks.forEach(([x,y])=>s+=`<rect class="bk" x="${x}" y="${y}" width="180" height="110" rx="6"/>`);
+  // filler buildings
+  [[270,45,60,40],[345,45,60,30],[490,190,70,45],[575,195,50,60],[270,325,70,40],[355,330,55,50],[490,330,60,50],[565,325,70,35],[50,190,60,70],[125,195,60,50]].forEach(([x,y,w,h])=>s+=`<rect class="filler" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>`);
+  // street names
+  s+=`<text class="stname" x="232" y="20" transform="rotate(90 232 20)">5th Ave</text><text class="stname" x="452" y="318" transform="rotate(90 452 318)">Main St</text><text class="stname" x="40" y="160">Pine St</text><text class="stname" x="40" y="300">Elm St</text>`;
+  // duct bank
+  s+=`<path class="duct" d="M0 155 H680 M0 295 H680 M230 0 V440 M450 0 V440"/>`;
+  // customer buildings
+  s+=`<rect class="bld" x="500" y="45" width="120" height="85" rx="4"/><text class="blbl" x="512" y="66">Hospital</text><text class="bsub" x="512" y="82">Imaging AI</text>`;
+  s+=`<rect class="bld" x="70" y="40" width="90" height="90" rx="4"/><text class="blbl" x="80" y="61">Office tower</text><text class="bsub" x="80" y="77">Enterprise AI</text>`;
+  s+=`<rect class="bld" x="45" y="325" width="140" height="70" rx="4"/><text class="blbl" x="57" y="346">Logistics depot</text><text class="bsub" x="57" y="362">Robots and AVs</text>`;
+  // central office
+  s+=`<rect class="co" x="280" y="185" width="120" height="80" rx="4"/><text class="blbl" x="340" y="206" text-anchor="middle">CO-07</text><text class="bsub" x="340" y="221" text-anchor="middle">Edge AI site</text><text class="bsub" x="340" y="235" text-anchor="middle">Ex-copper exchange</text>`;
+  // routes
+  ROUTE_ORDER.forEach(k=>{const r=ROUTES[k];const dash=(k==='peer'&&applied.peer==='standby')?'stroke-dasharray="7 6"':(k==='peer'&&applied.peer==='off')?'stroke-dasharray="2 7" opacity=".5"':'';
+    s+=`<path class="route vis${k===traceKey?' on':''}" data-r="${k}" d="${pathD(r.pts)}" stroke="${r.col}" ${dash}/><path class="route hit" data-r="${k}" d="${pathD(r.pts)}"><title>${r.name}</title></path>`});
+  // vaults
+  s+=`<g><title>East cable vault, Main St</title><rect class="vault" x="394" y="214" width="12" height="26" rx="2"/></g><text class="bsub" x="404" y="277" text-anchor="end">East vault</text>`;
+  s+=`<g><title>West cable vault, 5th Ave</title><rect class="vault" x="274" y="204" width="12" height="52" rx="2"/></g><text class="bsub" x="280" y="277" text-anchor="start">West vault</text>`;
+  // small cells
+  [[450,62],[450,120],[340,155],[560,155],[230,120],[600,295]].forEach(([x,y])=>s+=`<circle class="pole" cx="${x}" cy="${y}" r="5"><title>5G small cell</title></circle>`);
+  // manholes
+  [['M1',470,155],['M2',450,262],['M3',230,275],['M4',180,155]].forEach(([n,x,y])=>s+=`<g><title>Manhole ${n}</title><circle cx="${x}" cy="${y}" r="6" fill="var(--panel)" stroke="${n==='M3'?'var(--serious)':'var(--ink-2)'}" stroke-width="2"/></g><text class="axis" x="${x+9}" y="${y-6}">${n}</text>`);
+  // off-map labels
+  s+=`<text class="bsub" x="672" y="285" text-anchor="end">Cloud region · 40 km →</text><text class="bsub" x="238" y="430">↓ Peer site CO-12 · 6 km</text>`;
+  // latency badges
+  ['hospital','depot','cell','office'].forEach(k=>{const [x,y]=ROUTES[k].node;const t=liveLat(k).toFixed(1)+' ms';const w=t.length*6.6+12;const bx=k==='cell'?x-w-10:x-w/2,by=k==='cell'?y-9:y+(k==='depot'?14:-2);
+    s+=`<g class="lat" data-k="${k}"><rect class="badge" x="${bx}" y="${by}" width="${w}" height="18" rx="9"/><text class="btxt" x="${bx+w/2}" y="${by+12.5}" text-anchor="middle">${t}</text></g>`});
+  s+=`<circle id="photon" r="5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2" style="display:none"/>`;
+  $('#mapSvg').innerHTML=s;
+  $('#mapSvg').classList.toggle('dim',!!traceKey);
+}
+function updateBadges(){$$('#mapSvg .lat').forEach(g=>{g.querySelector('text').textContent=liveLat(g.dataset.k).toFixed(1)+' ms'})}
+function renderTracePanel(){
+  const r=ROUTES[traceKey];
+  $('#traceSel').innerHTML=ROUTE_ORDER.map(k=>`<option value="${k}" ${k===traceKey?'selected':''}>${ROUTES[k].name}</option>`).join('');
+  $('#trSteps').innerHTML=r.steps.map(s=>`<li>${s}</li>`).join('');
+  $('#trNote').textContent=r.svc+' · '+r.vault+' vault. '+r.note;
+  $('#trM').textContent='0 m';$('#trUs').textContent='0.0 µs';
+}
+function selectTrace(k){traceKey=k;$$('#mapSvg .route.vis').forEach(p=>p.classList.toggle('on',p.dataset.r===k));$('#mapSvg').classList.add('dim');renderTracePanel()}
+$('#mapSvg').addEventListener('click',e=>{const p=e.target.closest('[data-r]');if(p)selectTrace(p.dataset.r)});
+$('#traceSel').addEventListener('change',e=>selectTrace(e.target.value));
+let anim=null;
+$('#trGo').addEventListener('click',()=>{
+  const r=ROUTES[traceKey];const path=$(`#mapSvg .route.vis[data-r="${traceKey}"]`);const dot=$('#photon');const len=path.getTotalLength();
+  const lis=$$('#trSteps li');lis.forEach(l=>l.classList.remove('done'));
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;const dur=reduce?1:1600;const t0=performance.now();
+  cancelAnimationFrame(anim);dot.style.display='block';
+  const fr=now=>{const f=Math.min(1,(now-t0)/dur);const pt=path.getPointAtLength(len*f);dot.setAttribute('cx',pt.x);dot.setAttribute('cy',pt.y);
+    const m=r.m*f;$('#trM').textContent=(m>=1000?(m/1000).toFixed(1)+' km':Math.round(m)+' m');$('#trUs').textContent=(m/1000*4.9).toFixed(1)+' µs';
+    lis.forEach((l,i)=>l.classList.toggle('done',f>=i/(lis.length-1)-1e-6||f===1));
+    if(f<1)anim=requestAnimationFrame(fr);else setTimeout(()=>{dot.style.display='none'},700)};
+  anim=requestAnimationFrame(fr);
+});
+
+/* ---------- forecast ---------- */
 function renderForecast(){
   const W=420,H=230,L=40,R=12,T=14,B=28,pw=W-L-R,ph=H-T-B;
-  const fc=forecast();const ca=capOf(applied),cp=capOf(pend),dirty=ca!==cp;
-  const max=Math.max(ca,cp,fc[11].peak)*1.1;const step=niceStep(max/4);const ymax=Math.ceil(max/step)*step;
+  const fc=forecast();const ca=applied.racks,cp=pend.racks,dirty=ca!==cp;
+  const max=Math.max(ca,cp,fc[11].peak,MAX_GOOGLE)*1.08;const step=niceStep(max/4);const ymax=Math.ceil(max/step)*step;
   const y=v=>T+ph*(1-v/ymax);const bw=pw/12;
   let s='';for(let v=0;v<=ymax+1e-9;v+=step)s+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${v}</text>`;
-  fc.forEach((f,i)=>{const x=L+i*bw+2,w=bw-4,top=y(f.peak);s+=`<path d="M${x} ${y(0)} L${x} ${top+3} Q${x} ${top} ${x+3} ${top} L${x+w-3} ${top} Q${x+w} ${top} ${x+w} ${top+3} L${x+w} ${y(0)} Z" fill="${f.peak>ca*applied.scaleAt/100?'var(--s2)':'var(--s1)'}"/>`;
+  fc.forEach((f,i)=>{const x=L+i*bw+2,w=bw-4,top=y(f.peak);s+=`<path d="M${x} ${y(0)} L${x} ${top+3} Q${x} ${top} ${x+3} ${top} L${x+w-3} ${top} Q${x+w} ${top} ${x+w} ${top+3} L${x+w} ${y(0)} Z" fill="${f.peak>ca*applied.scaleAt/100?'var(--tenant)':'var(--google)'}"/>`;
     if(i%2===0||i===11)s+=`<text class="axis" x="${x+w/2}" y="${H-10}" text-anchor="middle">${f.label}</text>`});
-  s+=`<line x1="${L}" x2="${L+pw}" y1="${y(ca)}" y2="${y(ca)}" stroke="var(--ink-2)" stroke-width="2"/><text class="annot" x="${L+4}" y="${y(ca)-5}">Applied ${ca.toFixed(1)} Tbps</text>`;
-  if(dirty)s+=`<line x1="${L}" x2="${L+pw}" y1="${y(cp)}" y2="${y(cp)}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/><text class="annot" x="${L+pw-4}" y="${y(cp)-5}" text-anchor="end" style="fill:var(--accent)">Staged ${cp.toFixed(1)}</text>`;
+  s+=`<line x1="${L}" x2="${L+pw}" y1="${y(MAX_GOOGLE)}" y2="${y(MAX_GOOGLE)}" stroke="var(--muted)" stroke-dasharray="2 4"/><text class="annot" x="${L+pw-4}" y="${y(MAX_GOOGLE)-5}" text-anchor="end">Site limit ${MAX_GOOGLE}</text>`;
+  s+=`<line x1="${L}" x2="${L+pw}" y1="${y(ca)}" y2="${y(ca)}" stroke="var(--ink-2)" stroke-width="2"/><text class="annot" x="${L+4}" y="${y(ca)-5}">Reserved ${ca} racks</text>`;
+  if(dirty)s+=`<line x1="${L}" x2="${L+pw}" y1="${y(cp)}" y2="${y(cp)}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/><text class="annot" x="${L+4}" y="${y(cp)+14}" style="fill:var(--accent)">Staged ${cp}</text>`;
   s+=`<g id="fcHover"></g><rect id="fcHit" x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent"/>`;
   $('#fcSvg').innerHTML=s;
-  const over=fc.find(f=>f.peak>ca*applied.scaleAt/100),full=fc.find(f=>f.peak>ca);
-  const overP=fc.find(f=>f.peak>cp*pend.scaleAt/100);
-  $('#fcNote').innerHTML=(over?`Orange bars cross the ${applied.scaleAt}% burst trigger, starting <b>${over.label} ${over.y}</b>.`:`Peaks stay under the ${applied.scaleAt}% trigger for 12 months.`)+(full?` Peak demand exceeds lit capacity in <b>${full.label} ${full.y}</b>.`:'')+(dirty?` With staged changes: ${overP?'trigger crossed in '+overP.label+' '+overP.y:'no crossing in 12 months'}.`:'');
-  bindHover('#fcSvg','#fcHit','#fcTip','#fcHover',W,px=>{const i=clamp(Math.floor((px-L)/bw),0,11);const f=fc[i];const cx=L+i*bw+bw/2;return {x:cx,y:y(f.peak),html:`<div>${f.label} ${f.y}</div><div>Projected peak <b>${f.peak.toFixed(1)} Tbps</b></div><div><b>${(f.peak/ca*100).toFixed(0)}%</b> of applied capacity</div>`,g:`<rect x="${L+i*bw}" y="${T}" width="${bw}" height="${ph}" fill="var(--ink)" opacity=".05"/>`}});
+  const over=fc.find(f=>f.peak>ca*applied.scaleAt/100),full=fc.find(f=>f.peak>ca),site=fc.find(f=>f.peak>MAX_GOOGLE);
+  $('#fcNote').innerHTML=(over?`Orange bars pass the ${applied.scaleAt}% burst trigger from <b>${over.label} ${over.y}</b>.`:`Peaks stay under the ${applied.scaleAt}% trigger for 12 months.`)+(full?` Demand passes reserved racks in <b>${full.label} ${full.y}</b>.`:'')+(site?` It passes what CO-07 can offer Google in <b>${site.label} ${site.y}</b>, which is when the peer site matters.`:'');
+  bindHover('#fcSvg','#fcHit','#fcTip','#fcHover',W,px=>{const i=clamp(Math.floor((px-L)/bw),0,11);const f=fc[i];return {x:L+i*bw+bw/2,y:y(f.peak),html:`<div>${f.label} ${f.y}</div><div>Peak demand <b>${f.peak.toFixed(0)} racks</b></div><div><b>${(f.peak/ca*100).toFixed(0)}%</b> of reserved</div>`,g:`<rect x="${L+i*bw}" y="${T}" width="${bw}" height="${ph}" fill="var(--ink)" opacity=".05"/>`}});
 }
 
-/* ---- recommendations ---- */
+/* ---------- recommendations ---------- */
 function recs(){
-  const c=pend,fc=forecast(),cap=capOf(c),out=[];
-  const p6=fc[5].peak/cap;
-  if(c.waves<64&&p6>.8)out.push({w:pri.speed*2+pri.cost,t:`Add ${Math.min(16,64-c.waves)} wavelengths per pair`,d:`Lifts capacity to ${capOf({...c,waves:Math.min(64,c.waves+16)}).toFixed(1)} Tbps on fiber you already lease. Hitless, about 30 minutes.`,why:'Speed · cheapest way to add headroom',a:{waves:Math.min(64,c.waves+16)}});
-  if(p6>.85&&c.pairs<8)out.push({w:pri.speed*2+pri.resilience,t:'Light one more fiber pair',d:`Six-month peak reaches ${(p6*100).toFixed(0)}% of capacity. A third pair keeps AI training syncs off the burst reserve.`,why:'Speed · forecast growth 4.2% a month',a:{pairs:c.pairs+1}});
-  if(c.backup!=='active')out.push({w:pri.resilience*2,t:'Run the backup route active-active',d:`Commitment rises to 99.999% and maintenance never needs a traffic shift. About ${fmtK(econ({...c,backup:'active'}).total-econ(c).total)} more a month.`,why:'Reliability',a:{backup:'active'}});
-  if(c.backup==='active'&&pri.cost>=4&&pri.resilience<=3)out.push({w:pri.cost*2,t:'Move backup route to standby',d:`Saves ${fmtK(econ(c).total-econ({...c,backup:'standby'}).total)} a month and keeps a 99.99% commitment.`,why:'Cost',a:{backup:'standby'}});
-  if(p6<.55&&c.pairs>1)out.push({w:pri.cost*2+pri.sustain,t:'Return one fiber pair to dark',d:`Peak stays under ${(fc[5].peak/capOf({...c,pairs:c.pairs-1})*100).toFixed(0)}% on ${c.pairs-1} pair(s). Saves ${fmtK(econ(c).total-econ({...c,pairs:c.pairs-1}).total)} a month.`,why:'Cost · Sustainability',a:{pairs:c.pairs-1}});
-  if(c.rate===400)out.push({w:pri.sustain*2+pri.speed,t:'Upgrade to 800G optics',d:'Doubles capacity per wavelength and cuts watts per bit by about 40%.',why:'Sustainability · Speed',a:{rate:800}});
-  if(c.support==='onsite'&&pri.cost>=4)out.push({w:pri.cost*1.5,t:'Drop to Premium 24/7 support',d:`Restore commitment goes from 2 h to 4 h. Saves ${fmtK(SUPPORT.onsite.c-SUPPORT.premium.c)} a month.`,why:'Cost',a:{support:'premium'}});
-  if(c.support!=='onsite'&&pri.resilience>=5)out.push({w:pri.resilience*1.6,t:'Add on-site repair crews',d:'2-hour restore, and predicted failures are fixed before they happen.',why:'Reliability',a:{support:'onsite'}});
-  if(!c.autoscale)out.push({w:pri.speed*1.5+pri.resilience,t:'Turn on burst auto-scale',d:'A reserve pair lights automatically when traffic holds above the trigger.',why:'Speed',a:{autoscale:true}});
-  if(c.maint!=='lowload'&&pri.speed>=4)out.push({w:pri.speed,t:'Book maintenance in lowest-load windows',d:'Avoids the weekday 10 am–6 pm training peaks.',why:'Speed · Reliability',a:{maint:'lowload'}});
-  if(c.enc!=='customer'&&pri.resilience>=3)out.push({w:pri.resilience+3,t:'Hold your own encryption keys',d:'Verizon never sees key material. Matches the security control asked for in the requirements.',why:'Security',a:{enc:'customer'}});
+  const c=pend,fc=forecast(),out=[];const p6=fc[5].peak/c.racks;const dE=(o)=>econ({...c,...o}).total-econ(c).total;
+  if(p6>.85&&c.racks<MAX_GOOGLE){const n=Math.min(MAX_GOOGLE,c.racks+12);out.push({w:pri.speed*2+pri.resilience,t:`Reserve ${n-c.racks} more racks`,d:`Six-month peak reaches ${(p6*100).toFixed(0)}% of reserved racks. About ${fmtK(dE({racks:n}))} more a month.`,why:'Speed · demand grows about 5% a month',a:{racks:n}})}
+  if(p6<.6&&c.racks>24)out.push({w:pri.cost*2+pri.sustain,t:'Release 12 racks to the shared pool',d:`Saves ${fmtK(-dE({racks:c.racks-12}))} a month. Burst can still borrow them.`,why:'Cost',a:{racks:c.racks-12}});
+  if(c.mode==='eco'&&pri.speed>=4)out.push({w:pri.speed*2,t:'Switch GPUs to balanced power',d:`Cuts median latency by about ${(MODE.eco.lat-MODE.balanced.lat).toFixed(1)} ms for every customer on the block.`,why:'Speed',a:{mode:'balanced'}});
+  if(c.mode==='performance'&&(pri.cost>=4||pri.sustain>=4))out.push({w:Math.max(pri.cost,pri.sustain)*1.8,t:'Switch GPUs to balanced power',d:`Saves ${fmtK(-dE({mode:'balanced'}))} a month for 0.8 ms more latency.`,why:'Cost · Sustainability',a:{mode:'balanced'}});
+  if(c.mode==='balanced'&&pri.speed>=5&&pri.cost<=2)out.push({w:pri.speed*1.4,t:'Run GPUs in performance mode',d:`Median latency drops 0.8 ms. About ${fmtK(dE({mode:'performance'}))} more a month.`,why:'Speed',a:{mode:'performance'}});
+  if(c.entry!=='dual'&&pri.resilience>=3)out.push({w:pri.resilience*2,t:'Run both vault entrances active',d:'A cut on one street no longer stops traffic.',why:'Reliability · path diversity',a:{entry:'dual'}});
+  if(c.peer!=='share'&&pri.resilience>=5)out.push({w:pri.resilience*1.8,t:'Load-share with peer site CO-12',d:`Commitment rises to ${AVAIL[c.entry+'-share']}%. About ${fmtK(dE({peer:'share'}))} more a month.`,why:'Reliability',a:{peer:'share'}});
+  if(c.peer==='share'&&pri.cost>=4&&pri.resilience<=3)out.push({w:pri.cost*2,t:'Move peer site to standby',d:`Saves ${fmtK(-dE({peer:'standby'}))} a month.`,why:'Cost',a:{peer:'standby'}});
+  if(c.heat!=='reuse'&&pri.sustain>=3)out.push({w:pri.sustain*2+pri.cost*.5,t:'Send heat to the district loop',d:`Warms nearby apartments, a school and a greenhouse, and earns about ${fmtK(-econ({...c,heat:'reuse'}).lines[2][1])} a month.`,why:'Sustainability · community benefit',a:{heat:'reuse'}});
+  if(!c.gridShift&&pri.sustain>=3)out.push({w:pri.sustain*1.7,t:'Shift batch work to clean-power hours',d:'Raises renewable share to 72% and trims the power bill 5%.',why:'Sustainability · grid-friendly',a:{gridShift:true}});
+  if(c.rate===400&&c.waves>=48&&(pri.speed>=4||pri.sustain>=4))out.push({w:Math.max(pri.speed,pri.sustain)*1.3,t:'Move the cloud interconnect to 800G',d:`Doubles it to ${dciTbps({...c,rate:800}).toFixed(1)} Tbps on the same strands.`,why:'Speed · Sustainability',a:{rate:800}});
+  if(!c.autoscale)out.push({w:pri.speed*1.5+pri.resilience,t:'Turn on burst racks',d:'Open racks take overflow automatically above the trigger.',why:'Speed',a:{autoscale:true}});
+  if(c.enc!=='customer'&&pri.resilience>=3)out.push({w:pri.resilience+3,t:'Hold your own encryption keys',d:'Verizon never sees key material.',why:'Security',a:{enc:'customer'}});
+  if(c.maint!=='lowload'&&pri.speed>=4)out.push({w:pri.speed,t:'Book maintenance in lowest-load windows',d:'Keeps work away from weekday inference peaks.',why:'Speed · Reliability',a:{maint:'lowload'}});
+  if(c.support==='onsite'&&pri.cost>=4)out.push({w:pri.cost*1.5,t:'Drop to Premium 24/7 support',d:`Restore goes from 2 h to 4 h. Saves ${fmtK(SUPPORT.onsite.c-SUPPORT.premium.c)} a month.`,why:'Cost',a:{support:'premium'}});
   return out.sort((a,b)=>b.w-a.w).slice(0,4);
 }
-function renderRecs(){
-  const r=recs();window.__recs=r;
-  $('#recs').innerHTML=r.length?r.map((x,i)=>`<div class="rec"><b>${x.t}</b><p>${x.d}</p><span class="why">${x.why}</span><button class="btn" data-rec="${i}">Stage</button></div>`).join(''):'<p class="empty">Your staged settings already match these priorities. Nothing to recommend.</p>';
-}
+function renderRecs(){const r=recs();window.__recs=r;
+  $('#recs').innerHTML=r.length?r.map((x,i)=>`<div class="rec"><b>${x.t}</b><p>${x.d}</p><span class="why">${x.why}</span><button class="btn sm" data-rec="${i}">Stage</button></div>`).join(''):'<p class="empty">Your staged settings already match these priorities.</p>'}
 $('#recs').addEventListener('click',e=>{const b=e.target.closest('[data-rec]');if(!b)return;Object.assign(pend,window.__recs[+b.dataset.rec].a);confirming=false;renderCtl();renderDerived();toast('Staged. Review it under Staged changes.')});
 
-/* ---- costs ---- */
-function renderCosts(){
-  const a=econ(applied),p=econ(pend),dirty=isDirty();
-  const max=Math.max(...a.lines.map(l=>l[1]),...p.lines.map(l=>l[1]));
-  $('#costList').innerHTML=a.lines.map((l,i)=>{const d=p.lines[i][1]-l[1];return `<div class="bl"><span>${l[0]}</span><div class="track"><div class="fill" style="width:${l[1]/max*100}%"></div></div><span class="v">${fmt$(l[1])}</span><span class="d ${d>0?'up':d<0?'down':''}">${dirty&&Math.round(d)!==0?(d>0?'+':'−')+fmt$(Math.abs(d)).slice(0):''}</span></div>`}).join('')+
-   `<div class="bl total"><span>Total per month</span><span></span><span class="v">${fmt$(a.total)}</span><span class="d ${p.total>a.total?'up':p.total<a.total?'down':''}">${dirty&&Math.round(p.total-a.total)!==0?(p.total>a.total?'+':'−')+fmt$(Math.abs(p.total-a.total)):''}</span></div>`;
-  const budget=180000;
-  $('#costPill').className='pill '+(a.total>budget?'serious':a.total>budget*.85?'warn':'good');
-  $('#costPill').textContent=`${Math.round(a.total/budget*100)}% of ${fmtK(budget)} monthly budget`;
-  $('#unitCosts').innerHTML=[['Cost per PB moved',fmt$(a.perPB),fmt$(p.perPB)],['Cost per lit Tbps',fmt$(a.total/capOf(applied)),fmt$(p.total/capOf(pend))],['Annual commitment',fmtK(a.total*12),fmtK(p.total*12)]].map(([l,v,pv])=>`<div class="mini"><span class="lbl">${l}</span><b>${v}</b>${dirty&&pv!==v?` <span style="color:var(--muted);font-size:12px">→ ${pv}</span>`:''}</div>`).join('');
+/* ---------- underground ---------- */
+const TIA=[['Blue','#2a6fd6'],['Orange','#f07f2d'],['Green','#2f9e44'],['Brown','#8a5a3b'],['Slate','#7a8794'],['White','#f4f4f4'],['Red','#d63b3b'],['Black','#1b1b1b'],['Yellow','#f2c230'],['Violet','#7b4fd6'],['Rose','#f2a7b8'],['Aqua','#3fc7d1']];
+function strandClass(t,s,c){
+  // tube 0: Google DCI (customer-lit by Google), up to 8 strands; tube 1: hospital pair + depot; tube 2: Verizon lit services; tube 3: peer route
+  if(t===0){const n=c.pairs*2;return s<n?'google':s<8?'reserved':''}
+  if(t===1)return s<2?'tenant':s<4?'lit':'';
+  if(t===2)return s<8?'lit':'';
+  if(t===3)return s<(c.peer==='off'?0:2)?'lit':'';
+  if(t===4)return s<4?'reserved':'';
+  return '';
+}
+function renderUnderground(){
+  let h='';
+  for(let t=0;t<12;t++){h+=`<span class="tube"><i style="background:${TIA[t][1]}"></i>${String(t+1).padStart(2,'0')} ${TIA[t][0]}</span>`;
+    for(let s=0;s<12;s++){const a=strandClass(t,s,applied),p=strandClass(t,s,pend);const cls=a+(a!==p&&p==='google'?' add':'')+(a==='google'&&p!=='google'?' drop':'');
+      const lbl={google:'Google cloud interconnect, lit by Google optics',reserved:'Reserved for Google expansion',tenant:'Hospital pair, lit by hospital optics',lit:'Verizon lit service','':'Dark, available to lease'}[a];
+      h+=`<span class="strand ${cls}" title="Tube ${t+1} strand ${s+1}: ${lbl}"></span>`}}
+  $('#strands').innerHTML=h;
+  let cnt={google:0,reserved:0,tenant:0,lit:0,'':0};for(let t=0;t<12;t++)for(let s=0;s<12;s++)cnt[strandClass(t,s,applied)]++;
+  $('#strandStats').innerHTML=[['Google, lit by Google',cnt.google+' strands'],['Cloud interconnect',dciTbps(applied).toFixed(1)+' Tbps'],['Other customer-lit',cnt.tenant+' strands'],['Dark, available',cnt['']+' strands']].map(([a,b])=>`<div class="mini"><span class="lbl">${a}</span><b>${b}</b></div>`).join('');
+  $('#leasePair').disabled=pend.pairs>=4;
+  // vaults
+  const dual=applied.entry==='dual';
+  const share=(v)=>{const ks=ROUTE_ORDER.filter(k=>ROUTES[k].vault===v);return ks};
+  const vc=(v,street,primary)=>{const ks=share(v);const active=dual||primary;
+    return `<div class="vcard"><div class="row"><b>${v} vault · ${street}</b>${active?'<span class="pill good">Carrying traffic</span>':'<span class="pill warn">Standby</span>'}</div>
+      <div class="bar">${ks.map(k=>`<div style="flex:1;background:${ROUTES[k].col}" title="${ROUTES[k].name}"></div>`).join('')}</div>
+      <span style="font-size:12.5px;color:var(--ink-2)">${ks.map(k=>ROUTES[k].name).join(' · ')}</span>
+      <span class="hint" style="font-size:12px;color:var(--muted)">${active?'':'All of these routes enter through the east vault until the west is needed.'}</span></div>`};
+  $('#vaults').innerHTML=vc('East','Main St',true)+vc('West','5th Ave',false);
+  $('#entryPill').className='pill '+(dual?'good':'warn');$('#entryPill').textContent=dual?'Path diverse':'Single active path';
+  $('#manholes').innerHTML=[['M1','Pine St at Main','Hospital lateral','good','Healthy'],['M2','Main St','Cloud route','good','Healthy'],['M3','5th Ave','Depot and peer routes','serious','Loss rising'],['M4','Pine St at 5th','Office lateral','good','Healthy']]
+    .map(([n,w,r,k,s])=>`<li><b class="mono">${n}</b><span>${w}</span><span style="color:var(--muted)">${r}</span><span class="pill ${k}">${s}</span></li>`).join('');
+  renderSplice();
+}
+$('#leasePair').addEventListener('click',()=>{pend.pairs=Math.min(4,pend.pairs+1);confirming=false;renderCtl();renderDerived();toast('Staged one more Google fiber pair.')});
+function renderSplice(){
+  const W=420,H=170,L=40,R=14,T=12,B=24,pw=W-L-R,ph=H-T-B;
+  let seed=11;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  const data=[];for(let i=0;i<30;i++)data.push(.08+(i>12?(i-12)*.0125:0)+i*.001+(rnd()-.5)*.02);
+  const ymin=0,ymax=.6;const x=i=>L+pw*i/29,y=v=>T+ph*(1-(v-ymin)/(ymax-ymin));
+  let s='';for(let v=0;v<=.6+1e-9;v+=.2)s+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${v.toFixed(1)}</text>`;
+  s+=`<line x1="${L}" x2="${L+pw}" y1="${y(.5)}" y2="${y(.5)}" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="4 4"/><text class="annot" x="${L+4}" y="${y(.5)-5}">Repair threshold 0.5 dB</text>`;
+  const line=data.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  s+=`<path d="${line} L${x(29)} ${y(0)} L${x(0)} ${y(0)} Z" fill="var(--google-soft)"/><path d="${line}" fill="none" stroke="var(--google)" stroke-width="2"/><circle cx="${x(29)}" cy="${y(data[29])}" r="4.5" fill="var(--google)" stroke="var(--panel)" stroke-width="2"/>`;
+  [0,14,29].forEach(i=>s+=`<text class="axis" x="${x(i)}" y="${H-6}" text-anchor="${i===0?'start':i===29?'end':'middle'}">${i===29?'today':'−'+(29-i)+'d'}</text>`);
+  s+=`<g id="spliceHover"></g><rect id="spliceHit" x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent"/>`;
+  $('#spliceSvg').innerHTML=s;
+  const slope=(data[29]-data[13])/16;const days=Math.round((.5-data[29])/slope);
+  const t=maintPlan(applied)[0];const d=new Date(Date.now()+t.d*864e5);
+  $('#spliceNote').innerHTML=`Now <b class="mono">${data[29].toFixed(2)} dB</b>, rising ${(slope*1000).toFixed(0)} mdB a day. It reaches the threshold in about <b>${days} days</b>. Re-splice booked <b>${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}, ${String(t.h).padStart(2,'0')}:00</b>.`;
+  bindHover('#spliceSvg','#spliceHit','#spliceTip','#spliceHover',W,px=>{const i=clamp(Math.round((px-L)/pw*29),0,29);return {x:x(i),y:y(data[i]),html:`<div>${i===29?'Today':(29-i)+' days ago'}</div><div>Splice loss <b>${data[i].toFixed(3)} dB</b></div>`,g:`<line x1="${x(i)}" x2="${x(i)}" y1="${T}" y2="${T+ph}" stroke="var(--muted)"/><circle cx="${x(i)}" cy="${y(data[i])}" r="4" fill="var(--google)" stroke="var(--panel)" stroke-width="2"/>`}});
 }
 
-/* ---- maintenance ---- */
+/* ---------- inside ---------- */
+function rackMap(c,burst){
+  // other tenants: hall 6 racks 0-17 (office), hall 7 racks 0-17 (hospital, depot, Verizon 5G)
+  const other=new Set();for(let i=72;i<90;i++)other.add(i);for(let i=96;i<114;i++)other.add(i);
+  const order=[];for(let i=0;i<RACKS_TOTAL;i++)if(!other.has(i))order.push(i);
+  const g=new Set(order.slice(0,c.racks));const b=new Set(burst?order.slice(c.racks,c.racks+burstRacks(c)):[]);
+  return {other,g,b};
+}
+let floorSel='gpu5';
+function floorList(){
+  const e=econ(applied);const last=hist[hist.length-1]||{u:.6,mw:1};
+  const dciW=applied.pairs*applied.waves;
+  return [
+    {k:'roof',lv:'Roof',name:'Heat rejection',m:[`${applied.heat==='reuse'?(e.heatMWh/730).toFixed(2)+' MW to loop':HEAT[applied.heat].n}`,'Supply 32 °C · return 45 °C'],st:['good','Normal'],
+      d:'Dry coolers and pumps carry heat from the liquid-cooled racks out of the building. On landmark buildings they sit behind parapets so the street facade stays the same.',f:[['Mode',HEAT[applied.heat].n],['PUE',e.pue.toFixed(2)],['Water',HEAT[applied.heat].water+' L/kWh']]},
+    {k:'core',lv:'L8',name:'Optical core',m:[`${dciW+24} of 192 wavelengths`,`Cloud link ${dciTbps(applied).toFixed(1)} Tbps`],st:['good','Normal'],
+      d:'DWDM gear splits light into dozens of wavelengths, each its own channel. Lit services start here, and the 40 km route to Google\'s cloud region leaves from here.',f:[['Google wavelengths',`${dciW} × ${applied.rate}G`],['Verizon lit',`24 × 100G`],['Encryption',ENC[applied.enc].n]]},
+    ...[7,6,5,4,3].map(n=>({k:'gpu'+n,lv:'L'+n,name:'GPU hall '+n,hall:n-3,st:n===4?['warn','Filter due']:['good','Normal'],
+      d:'Liquid-cooled GPU racks on a floor that once held copper frames. They run inference, answering requests from nearby people and machines.',f:[]})),
+    {k:'mmr',lv:'L2',name:'Meet-me room',m:['14 cross-connects','Median connect 3.5 h'],st:['good','Normal'],
+      d:'The neutral cross-connect room. A customer\'s fiber from the street lands on a patch panel, and a short jumper connects it to Google\'s cage, the cloud or Verizon\'s network.',f:[['Last connected','Hospital pair, yesterday'],['Typical link','One pair, one jumper']]},
+    {k:'power',lv:'L1',name:'Power floor',m:[`${(last.mw+OTHER_RACKS*30*.7/1000).toFixed(2)} of ${SITE_MW} MW`,'UPS 2N · 48 h generator fuel'],st:['warn','UPS string B due'],
+      d:'Utility switchgear, UPS batteries and transfer gear. The phone network always had backup power, so the feeds and permits already exist.',f:[['Utility feeds','A and B, 13.2 kV'],['Google reserved',`${capMW(applied).toFixed(2)} MW`],['Site limit',SITE_MW+' MW IT']]},
+    {k:'vault',lv:'B1',name:'Cable vault',m:[applied.entry==='dual'?'East and west active':'East active, west standby','2 entrances, 2 streets'],st:applied.entry==='dual'?['good','Diverse']:['warn','Single active'],
+      d:'Every cable enters here, through two entrances on different streets, so one backhoe can\'t cut the building off.',f:[['East','Main St'],['West','5th Ave']]}];
+}
+function renderInside(){
+  const rm=rackMap(applied,burstOn),pm=rackMap(pend,false);
+  const last=hist[hist.length-1]||{u:.6};
+  $('#floors').innerHTML=floorList().map(fl=>{
+    let viz,metrics;
+    if(fl.hall!=null){const base=fl.hall*HALL;let racks='';let g=0,o=0,b=0;
+      for(let i=base;i<base+HALL;i++){let cls='';if(rm.other.has(i)){cls='tenant';o++}else if(rm.g.has(i)){cls='google';g++}else if(rm.b.has(i)){cls='burst';b++}
+        if(!rm.g.has(i)&&pm.g.has(i))cls+=' add';if(rm.g.has(i)&&!pm.g.has(i))cls='rack drop';racks+=`<span class="rack ${cls}"></span>`}
+      viz=`<div class="racks">${racks}</div>`;
+      metrics=[`${g} Google${b?` + ${b} burst`:''} · ${o} tenant`,g?`${Math.round(last.u*100)}% busy · ${(g*kwOf(applied)*last.u/1000).toFixed(2)} MW`:'No Google racks'];
+      fl.f=[['Google racks',g],['Burst racks',b],['Other tenants',o],['Open',HALL-g-o-b],['Rack power',kwOf(applied)+' kW max'],['Coolant supply','32 °C']];
+    }else{viz=`<div class="fviz">${fl.d.split('.')[0]}.</div>`;metrics=fl.m}
+    return `<button class="floor${fl.k==='vault'?' under':''}" data-f="${fl.k}" aria-pressed="${fl.k===floorSel}" type="button"><span class="fl"><b>${fl.name}</b><span>${fl.lv}</span></span>${viz}<span class="fm"><span class="pill ${fl.st[0]}">${fl.st[1]}</span><span>${metrics[0]}</span><span>${metrics[1]}</span></span></button>`}).join('');
+  renderFloorDetail();
+}
+function renderFloorDetail(){
+  const fl=floorList().find(f=>f.k===floorSel);
+  if(fl.hall!=null){const rm=rackMap(applied,burstOn);const base=fl.hall*HALL;let g=0,o=0,b=0;for(let i=base;i<base+HALL;i++){if(rm.other.has(i))o++;else if(rm.g.has(i))g++;else if(rm.b.has(i))b++}
+    fl.f=[['Google racks',g],['Burst racks',b],['Other tenants',o],['Open',HALL-g-o-b],['Rack power',kwOf(applied)+' kW max'],['Coolant supply','32 °C']];
+    if(fl.hall===1)fl.f.push(['Next task','Coolant filter change']);}
+  $('#floorDetail').innerHTML=`<div><h3>${fl.name} · ${fl.lv}</h3><p>${fl.d}</p></div><dl class="facts">${fl.f.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`;
+}
+$('#floors').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;floorSel=b.dataset.f;$$('#floors .floor').forEach(f=>f.setAttribute('aria-pressed',f.dataset.f===floorSel));renderFloorDetail()});
+
+/* maintenance */
 function maintPlan(cfg){
-  const tasks=[{n:'Amplifier module swap, ILA Hut 6',dur:2,day:[3,6]},{n:'Splice enclosure inspection, Segment 4',dur:2,day:[1,6]},{n:'Line amplifier firmware update',dur:1,day:[0,6]}];
-  const used=new Set();
-  return tasks.map(t=>{let best=null;
-    if(cfg.maint==='fixed'){const today=new Date().getDay();let d=(7-today)%7;if(d===0&&new Date().getHours()>=1)d=0;best={d,h:1+tasks.indexOf(t)*1}}
-    else{for(let d=t.day[0];d<=t.day[1];d++)for(let h=0;h<=24-t.dur;h++){if(d===0&&h<=new Date().getHours())continue;let s=0,clash=false;for(let k=0;k<t.dur;k++){s+=predLoad(d,h+k,cfg);if(used.has(d+':'+(h+k)))clash=true}if(clash)continue;if(!best||s<best.s)best={d,h,s}}}
-    for(let k=0;k<t.dur;k++)used.add(best.d+':'+(best.h+k));
-    return {...t,...best}});
+  const tasks=[{n:'Re-splice west path, Manhole M3',dur:2,day:[2,6],area:'splice'},{n:'UPS battery string B swap, power floor',dur:2,day:[1,6],area:'ups'},{n:'Coolant filter change, GPU hall 4',dur:1,day:[0,6],area:'gpu'}];
+  const used=new Set();const nowH=new Date().getHours();
+  return tasks.map((t,ti)=>{let best=null;
+    if(cfg.maint==='fixed'){const d=(7-new Date().getDay())%7;best={d,h:1+ti}}
+    else{for(let d=t.day[0];d<=t.day[1];d++)for(let h=0;h<=24-t.dur;h++){if(d===0&&h<=nowH)continue;let s=0,clash=false;for(let k=0;k<t.dur;k++){s+=predLoad(d,h+k,cfg);if(used.has(d+':'+(h+k)))clash=true}if(clash)continue;if(!best||s<best.s)best={d,h,s}}}
+    for(let k=0;k<t.dur;k++)used.add(best.d+':'+(best.h+k));return {...t,...best}});
 }
 function renderMaint(){
   const plan=maintPlan(applied);const wins=new Set();plan.forEach(p=>{for(let k=0;k<p.dur;k++)wins.add(p.d+':'+(p.h+k))});
   const col=v=>v<45?'var(--seq0)':v<55?'var(--seq1)':v<65?'var(--seq2)':v<75?'var(--seq3)':v<85?'var(--seq4)':'var(--seq5)';
   let s='<span></span>'+Array.from({length:24},(_,h)=>`<span class="h">${h%3===0?h:''}</span>`).join('');
   for(let d=0;d<7;d++){const dt=new Date(Date.now()+d*864e5);s+=`<span style="align-self:center">${dt.toLocaleDateString('en-US',{weekday:'short'})} ${dt.getDate()}</span>`;
-    for(let h=0;h<24;h++){const v=predLoad(d,h,applied);s+=`<span class="c${wins.has(d+':'+h)?' win':''}" style="background:${col(v)}" title="${dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} ${String(h).padStart(2,'0')}:00 · ${v.toFixed(0)}% predicted load${wins.has(d+':'+h)?' · maintenance':''}"></span>`}}
+    for(let h=0;h<24;h++){const v=predLoad(d,h,applied);const w=wins.has(d+':'+h);s+=`<span class="c${w?' win':''}" style="background:${col(v)}" title="${dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} ${String(h).padStart(2,'0')}:00 · ${v.toFixed(0)}% predicted load${w?' · maintenance':''}"></span>`}}
   $('#heat').innerHTML=s;
-  $('#heatLegend').innerHTML=[['<45','--seq0'],['55','--seq1'],['65','--seq2'],['75','--seq3'],['85','--seq4'],['85+','--seq5']].map(([l,v])=>`<span><i class="dot" style="background:var(${v});border:1px solid var(--line)"></i>${l}%</span>`).join('')+`<span><i class="dot" style="outline:2px solid var(--s2);outline-offset:-1px"></i>Maintenance</span>`;
-  const shift=applied.backup==='none';
-  $('#tasks').innerHTML=plan.map(p=>{const dt=new Date(Date.now()+p.d*864e5);const load=predLoad(p.d,p.h,applied);
-    return `<div class="task"><b>${p.n}</b><span class="when">${dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · ${String(p.h).padStart(2,'0')}:00–${String(p.h+p.dur).padStart(2,'0')}:00 CT</span>
-    <span class="imp">${shift?'<span class="pill crit">Outage risk</span> No backup route is enabled, so traffic stops during this window.':`<span class="pill good">No impact</span> Traffic moves to the backup route. Predicted load ${load.toFixed(0)}%.`} ${applied.maint==='approve'?'<span class="pill warn">Awaiting Google approval</span>':'Google notified 72 h ahead.'}</span></div>`}).join('');
+  $('#heatLegend').innerHTML=[['<45','--seq0'],['55','--seq1'],['65','--seq2'],['75','--seq3'],['85','--seq4'],['85+','--seq5']].map(([l,v])=>`<span><i class="dot" style="background:var(${v});border:1px solid var(--line)"></i>${l}%</span>`).join('')+`<span><i class="dot" style="outline:2px solid var(--tenant);outline-offset:-1px"></i>Maintenance</span>`;
+  const imp=p=>{
+    if(p.area==='splice')return applied.entry==='dual'?'<span class="pill good">No outage</span> Depot, office and peer traffic moves to the east vault for 2 hours.':'<span class="pill good">No impact</span> The west path is on standby.';
+    if(p.area==='ups')return applied.peer==='off'?'<span class="pill serious">Reduced backup</span> Site runs on one UPS string, and the peer site is off.':'<span class="pill good">No impact</span> One UPS string covers the load, and CO-12 can take traffic.';
+    return '<span class="pill good">No impact</span> Racks stay up on the redundant coolant pump.'};
+  $('#tasks').innerHTML=plan.map(p=>{const dt=new Date(Date.now()+p.d*864e5);return `<div class="task"><b>${p.n}</b><span class="when">${dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · ${String(p.h).padStart(2,'0')}:00–${String(p.h+p.dur).padStart(2,'0')}:00</span><span class="imp">${imp(p)} Predicted load ${predLoad(p.d,p.h,applied).toFixed(0)}%. ${applied.maint==='approve'?'<span class="pill warn">Awaiting Google approval</span>':'Google notified 72 h ahead.'}</span></div>`}).join('');
 }
 
-/* ---- OSNR ---- */
-function renderOsnr(){
-  const W=420,H=170,L=36,R=14,T=12,B=24,pw=W-L-R,ph=H-T-B;
-  const data=[];let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
-  for(let i=0;i<30;i++)data.push(21.4-(i>14?(i-14)*.085:0)-i*.008+(rnd()-.5)*.18);
-  const ymin=17,ymax=22;const x=i=>L+pw*i/29,y=v=>T+ph*(1-(v-ymin)/(ymax-ymin));
-  let s='';for(let v=ymin;v<=ymax;v++)s+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${v}</text>`;
-  s+=`<line x1="${L}" x2="${L+pw}" y1="${y(18)}" y2="${y(18)}" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="4 4"/><text class="annot" x="${L+pw}" y="${y(18)-5}" text-anchor="end">Repair threshold 18 dB</text>`;
-  const line=data.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
-  s+=`<path d="${line} L${x(29)} ${y(ymin)} L${x(0)} ${y(ymin)} Z" fill="var(--s1-soft)"/><path d="${line}" fill="none" stroke="var(--s1)" stroke-width="2"/>`;
-  s+=`<circle cx="${x(29)}" cy="${y(data[29])}" r="4.5" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>`;
-  [0,14,29].forEach(i=>s+=`<text class="axis" x="${x(i)}" y="${H-6}" text-anchor="${i===0?'start':i===29?'end':'middle'}">${i===29?'today':'−'+(29-i)+'d'}</text>`);
-  s+=`<g id="osnrHover"></g><rect id="osnrHit" x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent"/>`;
-  $('#osnrSvg').innerHTML=s;
-  const slope=(data[29]-data[15])/14;const days=Math.round((data[29]-18)/-slope);
-  const sw=maintPlan(applied)[0];const swd=new Date(Date.now()+sw.d*864e5);
-  $('#osnrNote').innerHTML=`Now <b class="mono">${data[29].toFixed(1)} dB</b>, falling ${(-slope).toFixed(2)} dB a day. At this rate it reaches the threshold in about <b>${days} days</b>. Swap booked for <b>${swd.toLocaleDateString('en-US',{month:'short',day:'numeric'})}, ${String(sw.h).padStart(2,'0')}:00</b>.`;
-  bindHover('#osnrSvg','#osnrHit','#osnrTip','#osnrHover',W,px=>{const i=clamp(Math.round((px-L)/pw*29),0,29);return {x:x(i),y:y(data[i]),html:`<div>${i===29?'Today':(29-i)+' days ago'}</div><div>OSNR <b>${data[i].toFixed(2)} dB</b></div>`,g:`<line x1="${x(i)}" x2="${x(i)}" y1="${T}" y2="${T+ph}" stroke="var(--muted)"/><circle cx="${x(i)}" cy="${y(data[i])}" r="4" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>`}});
+/* ---------- outside ---------- */
+function renderOutside(){
+  const rows=ROUTE_ORDER.map(k=>{const r=ROUTES[k];const lat=liveLat(k);
+    const isLocal=k!=='cloud'&&k!=='peer';
+    const gb=k==='cloud'?dciTbps(applied).toFixed(1)+' Tbps':k==='peer'?(applied.peer==='off'?'Off':applied.peer==='standby'?'Standby':'1.6 Tbps'):(r.gbps*(.9+Math.random()*.2)).toFixed(0)+' Gbps';
+    const dist=r.m>=1000?(r.m/1000)+' km':r.m+' m';
+    const status=isLocal?(lat<=r.sla*.8?['good','Within SLA']:lat<=r.sla?['warn','Near SLA']:['crit','Over SLA']):(k==='peer'&&applied.peer==='off'?['warn','Off']:['good','Up']);
+    const bar=isLocal?`<div class="slabar" title="${lat.toFixed(1)} of ${r.sla} ms SLA"><div style="width:${Math.min(100,lat/r.sla*100)}%"></div><i></i></div><span class="sub">${lat.toFixed(1)} ms of ${r.sla} ms SLA</span>`:`<span class="sub">Light travel ${(r.m/1000*4.9).toFixed(0)} µs one way</span>`;
+    return `<div class="crow"><span><b>${r.name}</b><br><span class="sub">${r.svc}</span></span><span>${dist}<br><span class="sub">${r.vault} vault</span></span><span class="mono">${gb}</span><span>${bar}</span><span class="pill ${status[0]}">${status[1]}</span></div>`});
+  $('#cust').innerHTML=`<div class="crow head"><span>Customer</span><span>Fiber</span><span>Traffic</span><span>Latency</span><span>Status</span></div>`+rows.join('');
+  const e=econ(applied);
+  const sc=[['PUE',e.pue.toFixed(2),'Lower is better. New-build average about 1.4'],['Renewable share',Math.round(e.renew*100)+'%','Green power agreements and rooftop solar'],['Water',HEAT[applied.heat].water+' L/kWh','Closed-loop liquid cooling'],
+    ['Heat reused',e.heatMWh?Math.round(e.heatMWh)+' MWh/mo':'None','Sent to the district loop'],['Net carbon',(e.co2-e.avoided).toFixed(1)+' t CO₂e/mo',`${e.co2.toFixed(1)} t emitted, ${e.avoided.toFixed(1)} t avoided heating`],['Copper recycled','3.4 t','From retired copper pairs']];
+  $('#score').innerHTML=sc.map(([a,b,c])=>`<div class="mini"><span class="lbl">${a}</span><b style="font-size:18px">${b}</b><div style="font-size:11.5px;color:var(--muted);margin-top:2px">${c}</div></div>`).join('');
+  const dests=[['Apartments on 5th Ave','240 homes, winter heat',.55],['P.S. 41 school','Classrooms and hot water',.25],['Rooftop greenhouse','Year-round growing',.2]];
+  $('#heatdest').innerHTML=dests.map(([n,s,f])=>`<div class="hd"><span><b>${n}</b><br><span style="color:var(--muted);font-size:11.5px">${s}</span></span><div class="track"><div style="width:${e.heatMWh?f*100:0}%"></div></div><span class="v">${e.heatMWh?Math.round(e.heatMWh*f)+' MWh':'—'}</span></div>`).join('');
+  $('#heatNote').textContent=applied.heat==='reuse'?'Heat from Google\'s racks warms the block instead of going into the air.':'Heat reuse is off, so waste heat leaves through the roof coolers. Turn on heat reuse in Site settings to send it to the district loop.';
 }
 
-/* ---- controls ---- */
+/* ---------- costs ---------- */
+function renderCosts(){
+  const a=econ(applied),p=econ(pend),dirty=isDirty();
+  const max=Math.max(...a.lines.map(l=>Math.abs(l[1])),...p.lines.map(l=>Math.abs(l[1])));
+  $('#costList').innerHTML=a.lines.map((l,i)=>{const d=p.lines[i][1]-l[1];return `<div class="bl"><span>${l[0]}</span><div class="track"><div class="${l[1]<0?'neg':''}" style="width:${Math.abs(l[1])/max*100}%"></div></div><span class="v">${fmt$(l[1])}</span><span class="d ${d>0?'up':d<0?'down':''}">${dirty&&Math.round(d)!==0?(d>0?'+':'−')+fmt$(Math.abs(d)).replace('−',''):''}</span></div>`}).join('')+
+   `<div class="bl total"><span>Total per month</span><span></span><span class="v">${fmt$(a.total)}</span><span class="d ${p.total>a.total?'up':p.total<a.total?'down':''}">${dirty&&Math.round(p.total-a.total)!==0?(p.total>a.total?'+':'−')+fmt$(Math.abs(p.total-a.total)):''}</span></div>`;
+  const budget=380000;
+  $('#costPill').className='pill '+(a.total>budget?'serious':a.total>budget*.85?'warn':'good');
+  $('#costPill').textContent=`${Math.round(a.total/budget*100)}% of ${fmtK(budget)} monthly budget`;
+  $('#unitCosts').innerHTML=[['Per million requests','$'+a.perM.toFixed(2),'$'+p.perM.toFixed(2)],['Per reserved rack',fmt$(a.total/applied.racks),fmt$(p.total/pend.racks)],['Annual commitment',fmtK(a.total*12),fmtK(p.total*12)]]
+    .map(([l,av,pv])=>`<div class="mini"><span class="lbl">${l}</span><b>${av}</b>${dirty&&pv!==av?` <span style="color:var(--muted);font-size:12px">→ ${pv}</span>`:''}</div>`).join('');
+}
+
+/* ---------- controls ---------- */
 function seg(id,opts,val){return `<div class="seg" role="group" id="${id}">${opts.map(([v,n])=>`<button type="button" data-v="${v}" aria-pressed="${String(v)===String(val)}">${n}</button>`).join('')}</div>`}
 function renderCtl(){
   const c=pend;
   $('#ctl').innerHTML=`
-  <div class="group"><div class="row"><span class="lbl">Lit fiber pairs</span><span class="hint">${capOf(c).toFixed(1)} Tbps lit</span></div>
-    <div class="row"><div class="stepper"><button type="button" data-step="pairs" data-d="-1" aria-label="Fewer fiber pairs">−</button><output id="o-pairs">${c.pairs}</output><button type="button" data-step="pairs" data-d="1" aria-label="More fiber pairs">+</button></div><span class="hint">of 8 leased · 6 h to light</span></div></div>
-  <div class="group"><div class="row"><label class="lbl" for="waves">Wavelengths per pair</label><span class="mono">${c.waves}</span></div>
-    <input type="range" id="waves" min="16" max="64" step="8" value="${c.waves}"><span class="hint">Google-owned optics. Changes are hitless.</span></div>
+  <div class="sect">Compute · Google GPU halls</div>
+  <div class="group"><div class="row"><span class="lbl">Reserved racks</span><span class="hint">${capMW(c).toFixed(2)} MW reserved</span></div>
+    <div class="row"><div class="stepper"><button type="button" data-step="racks" data-d="-12" aria-label="Fewer racks">−</button><output>${c.racks}</output><button type="button" data-step="racks" data-d="12" aria-label="More racks">+</button></div><span class="hint">of ${MAX_GOOGLE} available · 1 day to cage</span></div></div>
+  <div class="group"><span class="lbl">GPU power mode</span>${seg('mode',Object.entries(MODE).map(([k,v])=>[k,v.n]),c.mode)}<span class="hint">${MODE[c.mode].kw} kW per rack · about ${MODE[c.mode].lat} ms compute per request</span></div>
+  <div class="group"><div class="tog"><label class="lbl" for="autoscale">Burst into open racks</label><span class="switch"><input type="checkbox" id="autoscale" ${c.autoscale?'checked':''}><span></span></span></div>
+    <div class="row" ${c.autoscale?'':'hidden'}><label class="hint" for="scaleAt">Borrow open racks above</label><span class="mono">${c.scaleAt}%</span></div>
+    <input type="range" id="scaleAt" min="60" max="95" step="5" value="${c.scaleAt}" ${c.autoscale?'':'hidden'}></div>
+  <div class="sect">Cooling and energy</div>
+  <div class="group"><span class="lbl">Heat handling</span>${seg('heat',Object.entries(HEAT).map(([k,v])=>[k,v.n]),c.heat)}<span class="hint">PUE ${HEAT[c.heat].pue} · ${HEAT[c.heat].water} L water per kWh${c.heat==='reuse'?' · warms the block':''}</span></div>
+  <div class="group"><div class="tog"><label class="lbl" for="gridShift">Batch work in clean-power hours</label><span class="switch"><input type="checkbox" id="gridShift" ${c.gridShift?'checked':''}><span></span></span></div><span class="hint">Moves non-urgent jobs to hours with more renewable power</span></div>
+  <div class="sect">Network</div>
+  <div class="group"><div class="row"><span class="lbl">Cloud interconnect pairs</span><span class="hint">${dciTbps(c).toFixed(1)} Tbps to the cloud region</span></div>
+    <div class="row"><div class="stepper"><button type="button" data-step="pairs" data-d="-1" aria-label="Fewer fiber pairs">−</button><output>${c.pairs}</output><button type="button" data-step="pairs" data-d="1" aria-label="More fiber pairs">+</button></div><span class="hint">dark fiber, ${DCI_KM} km</span></div></div>
+  <div class="group"><div class="row"><label class="lbl" for="waves">Wavelengths per pair</label><span class="mono">${c.waves}</span></div><input type="range" id="waves" min="16" max="64" step="8" value="${c.waves}"></div>
   <div class="group"><span class="lbl">Optics per wavelength</span>${seg('rate',[[400,'400G'],[800,'800G']],c.rate)}</div>
+  <div class="group"><span class="lbl">Building entry</span>${seg('entry',Object.entries(ENTRY).map(([k,v])=>[k,v.n]),c.entry)}<span class="hint">East vault on Main St, west vault on 5th Ave</span></div>
+  <div class="group"><span class="lbl">Peer site CO-12</span>${seg('peer',Object.entries(PEER).map(([k,v])=>[k,v.n]),c.peer)}<span class="hint">Availability commitment ${availOf(c)}%</span></div>
   <div class="group"><span class="lbl">Traffic priority</span>
     <div class="mix">${CLS.map(([k,,col])=>`<div style="width:${c.cls[k]}%;background:${col}"></div>`).join('')}</div>
-    ${CLS.map(([k,n,col])=>`<div class="mixrow"><label for="cls-${k}"><i class="dot" style="background:${col}"></i>${n.split(' ')[0]==='AI'?'AI training':n.split(' ')[0]}</label><input type="range" id="cls-${k}" data-cls="${k}" min="5" max="90" value="${c.cls[k]}"><span class="v">${c.cls[k]}%</span></div>`).join('')}
-    <span class="hint">Guaranteed share of capacity during congestion</span></div>
-  <div class="group"><span class="lbl">Backup route</span>${seg('backup',Object.entries(BACKUP).map(([k,v])=>[k,v.n]),c.backup)}<span class="hint">Availability commitment ${BACKUP[c.backup].avail}%</span></div>
-  <div class="group"><div class="tog"><label class="lbl" for="autoscale">Burst auto-scale</label><span class="switch"><input type="checkbox" id="autoscale" ${c.autoscale?'checked':''}><span></span></span></div>
-    <div class="row" ${c.autoscale?'':'hidden'}><label class="hint" for="scaleAt">Light a reserve pair above</label><span class="mono">${c.scaleAt}%</span></div>
-    <input type="range" id="scaleAt" min="60" max="95" step="5" value="${c.scaleAt}" ${c.autoscale?'':'hidden'}></div>
+    ${CLS.map(([k,n,col,t])=>`<div class="mixrow"><label for="cls-${k}" title="${t}"><i class="dot" style="background:${col}"></i>${n}</label><input type="range" id="cls-${k}" data-cls="${k}" min="5" max="85" value="${c.cls[k]}"><span class="v">${c.cls[k]}%</span></div>`).join('')}
+    <span class="hint">Guaranteed share during congestion</span></div>
   <div class="group"><span class="lbl">Encryption</span>${seg('enc',Object.entries(ENC).map(([k,v])=>[k,v.n]),c.enc)}<span class="hint">${ENC[c.enc].desc}</span></div>
+  <div class="sect">Service</div>
   <div class="group"><span class="lbl">Support tier</span>${seg('support',Object.entries(SUPPORT).map(([k,v])=>[k,v.n.replace(' 24/7','')]),c.support)}<span class="hint">${SUPPORT[c.support].desc}</span></div>
   <div class="group"><span class="lbl">Maintenance scheduling</span>${seg('maint',Object.entries(MAINT).map(([k,v])=>[k,v.n]),c.maint)}<span class="hint">${MAINT[c.maint].desc}</span></div>`;
 }
 $('#ctl').addEventListener('click',e=>{
-  const st=e.target.closest('[data-step]');if(st){pend.pairs=clamp(pend.pairs+(+st.dataset.d),1,8);changed();return}
-  const b=e.target.closest('.seg button');if(b){const k=b.parentElement.id;const v=b.dataset.v;pend[k]=k==='rate'?+v:v;changed()}
+  const st=e.target.closest('[data-step]');if(st){const k=st.dataset.step;const d=+st.dataset.d;pend[k]=k==='racks'?clamp(pend[k]+d,12,MAX_GOOGLE):clamp(pend[k]+d,1,4);changed();return}
+  const b=e.target.closest('.seg button');if(b){const k=b.parentElement.id;pend[k]=k==='rate'?+b.dataset.v:b.dataset.v;changed()}
 });
 $('#ctl').addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='waves'){pend.waves=+t.value;changed(true)}
   else if(t.id==='scaleAt'){pend.scaleAt=+t.value;changed(true)}
   else if(t.id==='autoscale'){pend.autoscale=t.checked;changed()}
+  else if(t.id==='gridShift'){pend.gridShift=t.checked;changed()}
   else if(t.dataset.cls){const k=t.dataset.cls;const v=+t.value;const others=CLS.map(c=>c[0]).filter(x=>x!==k);const rest=100-v;const sum=others.reduce((a,o)=>a+pend.cls[o],0)||1;
     const n={...pend.cls,[k]:v};let acc=0;others.forEach((o,i)=>{n[o]=i===others.length-1?rest-acc:Math.max(5,Math.round(pend.cls[o]/sum*rest));acc+=n[o]});
-    if(n[others[1]]<5){n[others[1]]=5;n[others[0]]=rest-5}pend.cls=n;changed(true)}
+    const lo=others[others.length-1];if(n[lo]<5){const big=others.slice(0,-1).sort((a,b)=>n[b]-n[a])[0];n[big]-=5-n[lo];n[lo]=5}
+    pend.cls=n;changed(true)}
 });
-function changed(fromSlider){confirming=false;if(fromSlider){updateCtlReadouts()}else renderCtl();renderDerived()}
+function changed(fromSlider){confirming=false;if(fromSlider)updateCtlReadouts();else renderCtl();renderDerived()}
 function updateCtlReadouts(){
   const g=$('#ctl');const w=g.querySelector('#waves');w.previousElementSibling.querySelector('.mono').textContent=pend.waves;
-  g.querySelector('.group .hint').textContent=capOf(pend).toFixed(1)+' Tbps lit';
   const sa=g.querySelector('#scaleAt');sa.previousElementSibling.querySelector('.mono').textContent=pend.scaleAt+'%';
+  $$('#ctl .group .hint').forEach(h=>{if(/Tbps to the cloud/.test(h.textContent))h.textContent=dciTbps(pend).toFixed(1)+' Tbps to the cloud region'});
   const mix=g.querySelector('.mix').children;CLS.forEach(([k],i)=>{mix[i].style.width=pend.cls[k]+'%';const r=g.querySelector('#cls-'+k);r.value=pend.cls[k];r.nextElementSibling.textContent=pend.cls[k]+'%'});
 }
 
-/* ---- staged changes ---- */
-const LABELS={pairs:['Lit fiber pairs',v=>v,'Hitless · new pair lit in about 6 h'],waves:['Wavelengths per pair',v=>v,'Hitless · about 30 min'],rate:['Optics per wavelength',v=>v+'G','Rolling optic swap over 2 nights'],backup:['Backup route',v=>BACKUP[v].n,'About 1 h, no traffic impact'],enc:['Encryption',v=>ENC[v].n,'Key rotation, about 15 min'],autoscale:['Burst auto-scale',v=>v?'On':'Off','Immediate'],scaleAt:['Burst trigger',v=>v+'%','Immediate'],support:['Support tier',v=>SUPPORT[v].n,'Starts next billing cycle'],maint:['Maintenance scheduling',v=>MAINT[v].n,'Applies to upcoming windows'],cls:['Traffic priority',v=>`${v.training}/${v.inference}/${v.replication}`,'Immediate · training/inference/replication']};
+/* ---------- staged changes ---------- */
+const LABELS={racks:['Reserved racks',v=>v,'Caged and powered within 1 day'],mode:['GPU power mode',v=>MODE[v].n,'Rolls across halls in about 1 hour'],autoscale:['Burst into open racks',v=>v?'On':'Off','Immediate'],scaleAt:['Burst trigger',v=>v+'%','Immediate'],
+  heat:['Heat handling',v=>HEAT[v].n,'Valve change, about 4 hours'],gridShift:['Clean-power scheduling',v=>v?'On':'Off','Next scheduling cycle'],
+  pairs:['Cloud interconnect pairs',v=>v,'New pair lit in about 6 hours'],waves:['Wavelengths per pair',v=>v,'Hitless, about 30 minutes'],rate:['Optics per wavelength',v=>v+'G','Rolling optic swap over 2 nights'],
+  entry:['Building entry',v=>ENTRY[v].n,'About 1 hour, no traffic impact'],peer:['Peer site CO-12',v=>PEER[v].n,'About 1 hour'],cls:['Traffic priority',v=>`${v.realtime}/${v.imaging}/${v.enterprise}/${v.bulk}`,'Immediate · real-time/imaging/enterprise/bulk'],
+  enc:['Encryption',v=>ENC[v].n,'Key rotation, about 15 minutes'],support:['Support tier',v=>SUPPORT[v].n,'Starts next billing cycle'],maint:['Maintenance scheduling',v=>MAINT[v].n,'Applies to upcoming windows']};
 function diffs(){return Object.keys(LABELS).filter(k=>JSON.stringify(applied[k])!==JSON.stringify(pend[k])).filter(k=>!(k==='scaleAt'&&!pend.autoscale&&!applied.autoscale))}
 function isDirty(){return diffs().length>0}
 function renderPend(){
   const ds=diffs();$('#pendCard').classList.toggle('clean',!ds.length);
   $('#pendCount').textContent=ds.length?`${ds.length} change${ds.length>1?'s':''}`:'';
   if(!ds.length){$('#pendBody').innerHTML='<p class="empty">No changes staged. Adjust a setting or stage a recommendation to see its cost and effect here.</p>';return}
-  const a=econ(applied).total,p=econ(pend).total,d=p-a;
-  const fa=fit(applied),fp=fit(pend);
-  const warn=pend.backup==='none'?'<p style="margin:0;font-size:12.5px;color:var(--crit-ink)">With no backup route, a fiber cut or maintenance window stops traffic.</p>':'';
+  const a=econ(applied).total,p=econ(pend).total,d=p-a;const fa=fit(applied),fp=fit(pend);
+  const warns=[];if(pend.entry==='east')warns.push('With one active entrance, a cut on Main St stops traffic until the west path takes over.');if(pend.peer==='off')warns.push('With the peer site off, there is no second site to fail over to.');if(pend.heat==='evap')warns.push(`Evaporative cooling uses about ${HEAT.evap.water} L of water per kWh.`);
   $('#pendBody').innerHTML=`<ul class="diff">${ds.map(k=>{const [n,f,eta]=LABELS[k];return `<li><span>${n}</span><span><span class="from">${f(applied[k])}</span> → <span class="to">${f(pend[k])}</span></span><span class="eta">${eta}</span></li>`}).join('')}</ul>
    <div class="delta"><span><span class="lbl">Monthly cost</span><br><span class="mono" style="font-size:12px;color:var(--ink-2)">${fmt$(a)} → ${fmt$(p)}</span></span><strong class="${d>0?'up':d<0?'down':''}">${d>=0?'+':'−'}${fmt$(Math.abs(d))}</strong></div>
-   <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-2)">Fit to priorities ${fa} → <b>${fp}</b> · Capacity ${capOf(applied).toFixed(1)} → <b>${capOf(pend).toFixed(1)} Tbps</b></p>${warn}
-   ${confirming?`<div class="confirm"><span>Apply ${ds.length} change${ds.length>1?'s':''} to the live network? Verizon's NOC is notified and changes roll out as listed above.</span><div class="btns"><button class="btn primary" id="doApply">Confirm and apply</button><button class="btn" id="noApply">Back</button></div></div>`
+   <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-2)">Fit to priorities ${fa} → <b>${fp}</b> · Reserved ${capMW(applied).toFixed(2)} → <b>${capMW(pend).toFixed(2)} MW</b> · Availability <b>${availOf(pend)}%</b></p>
+   ${warns.map(w=>`<p style="margin:0 0 8px;font-size:12.5px;color:var(--crit-ink)">${w}</p>`).join('')}
+   ${confirming?`<div class="confirm"><span>Apply ${ds.length} change${ds.length>1?'s':''} to CO-07? The Verizon site team is notified and changes roll out as listed above.</span><div class="btns"><button class="btn primary" id="doApply">Confirm and apply</button><button class="btn" id="noApply">Back</button></div></div>`
      :`<div class="btns" style="margin-top:10px"><button class="btn primary" id="review">Review and apply</button><button class="btn" id="discard">Discard</button></div>`}`;
 }
 $('#pendBody').addEventListener('click',e=>{
@@ -713,26 +1091,46 @@ $('#pendBody').addEventListener('click',e=>{
     const ds=diffs();const d=econ(pend).total-econ(applied).total;
     const what=ds.map(k=>{const [n,f]=LABELS[k];return `${n} ${f(applied[k])} → ${f(pend[k])}`}).join('; ');
     log.unshift({t:new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}),who:'Google NetOps (you)',what,d});log=log.slice(0,12);
-    applied=structuredClone(pend);confirming=false;save('aic.cfg',applied);try{localStorage.setItem('aic.log',JSON.stringify(log))}catch(err){}
+    applied=structuredClone(pend);confirming=false;save('aic2.cfg',applied);try{localStorage.setItem('aic2.log',JSON.stringify(log))}catch(err){}
     renderCtl();renderAll();toast(`Applied ${ds.length} change${ds.length>1?'s':''}`);
   }
 });
 function renderLog(){
   $('#log').innerHTML=log.map(l=>`<li><time>${l.t} · ${l.who}</time><span>${l.what}</span><span class="mono ${l.d>0?'up':l.d<0?'down':''}" style="font-size:12px">${l.d?(l.d>0?'+':'−')+fmtK(Math.abs(l.d)):'—'}</span></li>`).join('')+
-   `<li><span></span><button class="btn" id="resetDemo" style="font-size:12px;padding:5px 10px">Reset demo</button></li>`;
+   `<li><span></span><button class="btn sm" id="resetDemo" type="button">Reset demo</button></li>`;
 }
-$('#log').addEventListener('click',e=>{if(e.target.id!=='resetDemo')return;try{['aic.cfg','aic.pri','aic.log'].forEach(k=>localStorage.removeItem(k))}catch(err){}location.reload()});
-
+$('#log').addEventListener('click',e=>{if(e.target.id!=='resetDemo')return;try{['aic2.cfg','aic2.pri','aic2.log'].forEach(k=>localStorage.removeItem(k))}catch(err){}location.reload()});
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2400)}
 
-function renderDerived(){renderFit();renderPend();renderRecs();renderCosts();renderForecast();renderKpis()}
-function renderAll(){renderPri();renderDerived();renderRoute();renderMaint();renderOsnr();renderLog();renderLive();renderFeed()}
+/* ---------- tabs ---------- */
+const TABS=['overview','underground','inside','outside','costs'];
+let currentTab=(()=>{const h=(location.hash||'').slice(1);if(TABS.includes(h))return h;try{const s=localStorage.getItem('aic2.tab');if(TABS.includes(s))return s}catch(e){}return 'overview'})();
+function showTab(t){currentTab=t;TABS.forEach(k=>{$('#view-'+k).hidden=k!==t;const b=$('#tab-'+k);b.setAttribute('aria-selected',k===t);b.tabIndex=k===t?0:-1});try{localStorage.setItem('aic2.tab',t)}catch(e){}renderTab()}
+$('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)showTab(b.dataset.tab)});
+$('.tabs').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;const i=TABS.indexOf(currentTab);const n=TABS[(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length];showTab(n);$('#tab-'+n).focus()});
+function renderTab(){
+  if(currentTab==='overview'){renderMap();renderTracePanel();renderLive();renderForecast();renderRecs();renderFeed()}
+  else if(currentTab==='underground')renderUnderground();
+  else if(currentTab==='inside'){renderInside();renderMaint()}
+  else if(currentTab==='outside')renderOutside();
+  else if(currentTab==='costs')renderCosts();
+}
+function renderDerived(){renderFit();renderPend();renderKpis();
+  if(currentTab==='overview'){renderRecs();renderForecast()}
+  else if(currentTab==='underground')renderUnderground();
+  else if(currentTab==='inside')renderInside();
+  else if(currentTab==='costs')renderCosts();
+}
+function renderAll(){renderPri();renderDerived();renderLog();renderTab()}
 
-// warm up history so the chart opens with two minutes of data
 (function(){const t0=Date.now();for(let i=59;i>=0;i--){sample();hist[hist.length-1].t=new Date(t0-i*2000)}})();
-renderCtl();renderAll();
-function tick(){sample();renderLive();renderKpis();$('#clock').textContent='Live · '+new Date().toLocaleTimeString('en-US',{hour12:false})}
-tick();setInterval(tick,2000);
+renderCtl();renderPri();renderFit();renderPend();renderKpis();renderLog();showTab(currentTab);
+let tick=0;
+setInterval(()=>{sample();tick++;renderKpis();$('#clock').textContent='Live · '+new Date().toLocaleTimeString('en-US',{hour12:false});
+  if(currentTab==='overview'){renderLive();updateBadges()}
+  else if(currentTab==='inside'&&tick%2===0)renderInside();
+  else if(currentTab==='outside'&&tick%2===0)renderOutside();
+},2000);
 })();
 </script>
 
