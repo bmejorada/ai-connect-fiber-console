@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>AI Connect Fiber Console</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: operations console. Summary strip on top, live telemetry + route on the left, a sticky control rail on the right where changes are staged, priced and applied. */
+:root{
+  --bg:#eef2f6; --panel:#ffffff; --sunken:#f5f7fa; --ink:#0e1726; --ink-2:#465266; --muted:#748096; --line:#dbe2ea;
+  --accent:#0d7480; --accent-ink:#ffffff; --accent-soft:#e1f1f2;
+  --s1:#2a78d6; --s1-soft:rgba(42,120,214,.16); --s2:#eb6834;
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+  --good-ink:#0a7a0a; --warn-ink:#8a5d00; --serious-ink:#b2491f; --crit-ink:#b02a2a;
+  --seq0:#eef3fa; --seq1:#cde2fb; --seq2:#86b6ef; --seq3:#3987e5; --seq4:#1c5cab; --seq5:#0d366b;
+  --display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042;
+  --accent:#3fb7c1; --accent-ink:#06191b; --accent-soft:#12303a;
+  --s1:#3987e5; --s1-soft:rgba(57,135,229,.22); --s2:#d95926;
+  --good-ink:#4fd04f; --warn-ink:#fab219; --serious-ink:#f09a76; --crit-ink:#f07070;
+  --seq0:#152131; --seq1:#184f95; --seq2:#256abf; --seq3:#3987e5; --seq4:#86b6ef; --seq5:#cde2fb;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042;
+  --accent:#3fb7c1; --accent-ink:#06191b; --accent-soft:#12303a;
+  --s1:#3987e5; --s1-soft:rgba(57,135,229,.22); --s2:#d95926;
+  --good-ink:#4fd04f; --warn-ink:#fab219; --serious-ink:#f09a76; --crit-ink:#f07070;
+  --seq0:#152131; --seq1:#184f95; --seq2:#256abf; --seq3:#3987e5; --seq4:#86b6ef; --seq5:#cde2fb;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+.wrap{max-width:1440px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance;letter-spacing:.005em}
+h2{font-size:19px}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px}
+.brand{display:flex;flex-direction:column;gap:1px;margin-right:auto;min-width:0}
+.brand h1{font-size:24px;line-height:1.1}
+.brand h1 span{color:var(--accent)}
+.brand .sub{color:var(--ink-2);font-size:13px}
+.topctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-width:0;max-width:100%}
+.field{display:flex;flex-direction:column;gap:3px;min-width:0;max-width:100%}
+.field select{width:100%;text-overflow:ellipsis}
+.field label,.lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+select{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:7px 10px;max-width:100%}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 rgba(12,163,12,.5);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px rgba(12,163,12,0)}100%{box-shadow:0 0 0 0 rgba(12,163,12,0)}}
+.proto{font-size:11.5px;color:var(--muted);width:100%}
+
+/* priorities */
+.prio{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,2.6fr) auto;gap:14px 24px;align-items:center}
+.prio .presets{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{border:1px solid var(--line);background:var(--sunken);border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.sliders{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 18px}
+.sl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sl .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sl b{font-weight:600;font-size:13.5px}
+.sl .v{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.fit{display:flex;align-items:center;gap:12px}
+.ring{width:64px;height:64px;flex:none}
+.fit .t{display:flex;flex-direction:column}
+.fit .t strong{font-family:var(--display);font-size:15px}
+.fit .t span{font-size:12px;color:var(--ink-2);max-width:20ch}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.kpi{background:var(--panel);padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .val{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi .val small{font-size:15px;font-weight:500;color:var(--ink-2);margin-left:3px}
+.kpi .foot{font-size:12px;color:var(--ink-2)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;padding:2px 8px 2px 6px;border-radius:999px;border:1px solid var(--line);width:max-content;max-width:100%}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.good{color:var(--good-ink)} .pill.warn{color:var(--warn-ink)} .pill.serious{color:var(--serious-ink)} .pill.crit{color:var(--crit-ink)}
+.pill.good::before{background:var(--good)} .pill.warn::before{background:var(--warn)} .pill.serious::before{background:var(--serious)} .pill.crit::before{background:var(--crit)}
+
+/* main grid */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:start}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.card-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 14px;margin-bottom:12px}
+.card-h p{margin:2px 0 0;color:var(--ink-2);font-size:13px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.chartbox{position:relative;width:100%}
+.chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;box-shadow:0 6px 18px rgba(0,0,0,.12);white-space:nowrap;transform:translate(-50%,-100%);display:none;z-index:5}
+.tip b{font-family:var(--mono);font-weight:500}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.axis{fill:var(--muted);font-family:var(--mono);font-size:10.5px}
+.gridl{stroke:var(--line);stroke-width:1}
+.annot{fill:var(--ink-2);font-size:11px;font-family:var(--body)}
+
+/* route */
+.route-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.mini{background:var(--sunken);border-radius:8px;padding:8px 10px;min-width:0}
+.mini .lbl{display:block}
+.mini b{font-family:var(--mono);font-weight:500;font-size:13px}
+
+/* control rail */
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 92px);display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 110px);overflow:auto;padding-bottom:2px}
+.ctl{display:flex;flex-direction:column;gap:14px}
+.group{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--line)}
+.group:first-child{border-top:0;padding-top:0}
+.group .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.group .hint{font-size:12px;color:var(--muted)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:7px;overflow:hidden;width:max-content}
+.stepper button{border:0;background:var(--sunken);width:34px;height:32px;cursor:pointer;font-size:16px}
+.stepper button:hover{background:var(--accent-soft)}
+.stepper output{min-width:46px;text-align:center;font-family:var(--mono);font-size:14px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;border-left:1px solid var(--line);background:var(--panel);padding:7px 6px;font-size:12.5px;cursor:pointer}
+.seg button:first-child{border-left:0}
+.seg button:hover{background:var(--sunken)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:500}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.switch{position:relative;width:40px;height:22px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;margin:0;position:absolute;cursor:pointer;z-index:1}
+.switch span{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.15s}
+.switch span::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.switch input:checked+span{background:var(--accent)}
+.switch input:checked+span::after{left:21px}
+.switch input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.mix{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin:2px 0 4px}
+.mix div{height:100%}
+.mixrow{display:grid;grid-template-columns:92px minmax(0,1fr) 38px;gap:8px;align-items:center;font-size:12.5px}
+.mixrow .v{font-family:var(--mono);text-align:right}
+.dot{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px}
+
+.pending{border-color:var(--accent)}
+.pending.clean{border-color:var(--line)}
+.diff{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.diff li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px}
+.diff .from{color:var(--muted);text-decoration:line-through}
+.diff .to{font-weight:500}
+.diff .eta{grid-column:1/-1;color:var(--muted);font-size:11.5px}
+.delta{display:flex;justify-content:space-between;align-items:baseline;margin:12px 0;padding:10px 12px;background:var(--sunken);border-radius:8px}
+.delta strong{font-family:var(--display);font-size:22px}
+.up{color:var(--serious-ink)} .down{color:var(--good-ink)}
+.btns{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:8px 14px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.confirm{margin-top:10px;padding:10px 12px;border:1px dashed var(--accent);border-radius:8px;font-size:12.5px;display:flex;flex-direction:column;gap:8px}
+.empty{color:var(--muted);font-size:13px}
+
+/* recs */
+.recs{display:flex;flex-direction:column;gap:8px}
+.rec{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;align-items:center}
+.rec b{font-weight:600;font-size:13.5px}
+.rec p{margin:0;font-size:12.5px;color:var(--ink-2);grid-column:1}
+.rec .why{font-size:11.5px;color:var(--muted)}
+.rec .btn{grid-row:1/span 3;grid-column:2;padding:6px 11px;font-size:12.5px}
+
+/* costs */
+.barlist{display:flex;flex-direction:column;gap:7px}
+.bl{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) 86px 70px;gap:10px;align-items:center;font-size:12.5px}
+.bl .track{height:12px;background:var(--sunken);border-radius:0 4px 4px 0;position:relative}
+.bl .fill{height:100%;background:var(--s1);border-radius:0 4px 4px 0}
+.bl .v{font-family:var(--mono);text-align:right}
+.bl .d{font-family:var(--mono);text-align:right;font-size:11.5px}
+.bl.total{border-top:1px solid var(--line);padding-top:8px;font-weight:600}
+.unit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+
+/* maintenance */
+.heat{display:grid;grid-template-columns:44px repeat(24,minmax(0,1fr));gap:2px;font-family:var(--mono);font-size:10px;color:var(--muted)}
+.heat .c{aspect-ratio:1/1;max-width:100%;border-radius:2px;position:relative}
+.heat .c.win{outline:2px solid var(--s2);outline-offset:-1px;z-index:1}
+.heat .h{text-align:center}
+.tasks{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.task{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;padding:9px 12px;background:var(--sunken);border-radius:8px;font-size:12.5px}
+.task b{font-weight:600}
+.task .when{font-family:var(--mono);font-size:12px}
+.task .imp{grid-column:1/-1;color:var(--ink-2)}
+.feed{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.feed li{display:grid;grid-template-columns:62px minmax(0,1fr);gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:12.5px}
+.feed li:first-child{border-top:0}
+.feed time{font-family:var(--mono);color:var(--muted);font-size:11.5px}
+.feed .pill{margin-bottom:3px}
+
+.log{list-style:none;margin:0;padding:0;font-size:12.5px;display:flex;flex-direction:column;gap:8px}
+.log li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px}
+.log time{color:var(--muted);font-family:var(--mono);font-size:11.5px;grid-column:1/-1}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:50;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:1180px){
+  .main{grid-template-columns:minmax(0,1fr)}
+  .rail{position:static;max-height:none;overflow:visible;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .prio{grid-template-columns:minmax(0,1fr) auto}
+  .prio .sliders{grid-column:1/-1;grid-row:2}
+}
+@media (max-width:760px){
+  .rail{grid-template-columns:minmax(0,1fr)}
+  .two{grid-template-columns:minmax(0,1fr)}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sliders{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .route-meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bl{grid-template-columns:minmax(0,1fr) 78px 60px}
+  .bl .track{grid-column:1/-1;grid-row:2}
+  .unit{grid-template-columns:minmax(0,1fr)}
+  .top{position:static}
+  .kpi .val{font-size:26px}
+}
+@media (max-width:480px){.prio{grid-template-columns:minmax(0,1fr)}.heat{grid-template-columns:30px repeat(24,minmax(0,1fr));font-size:8.5px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Verizon × Google · Dedicated dark fiber for AI workloads</span>
+      <h1>AI Connect <span>Fiber Console</span></h1>
+      <span class="sub">Signed in as <b>Google Network Operations</b> · Account team: Verizon Business, 24/7</span>
+    </div>
+    <div class="topctl">
+      <div class="field">
+        <label for="routeSel">Route</label>
+        <select id="routeSel">
+          <option value="cbpr">Council Bluffs, IA ⇄ Pryor, OK · Live (v0)</option>
+          <option disabled>The Dalles, OR ⇄ Council Bluffs, IA · Planned 2028</option>
+          <option disabled>Ten partner-client strands · Planned 2029</option>
+          <option disabled>Coast-to-coast AI connector · Planned 2030</option>
+        </select>
+      </div>
+      <span class="live" id="liveTag"><i></i><span id="clock">Live</span></span>
+    </div>
+    <p class="proto">MPD400 Yellow Team concept prototype. All telemetry and pricing are simulated for illustration; final pricing depends on the Google feasibility study.</p>
+  </header>
+
+  <section class="prio" aria-labelledby="prioH">
+    <div>
+      <h2 id="prioH">What Google is prioritizing</h2>
+      <div class="presets" id="presets"></div>
+    </div>
+    <div class="sliders" id="sliders"></div>
+    <div class="fit">
+      <svg class="ring" viewBox="0 0 64 64" id="fitRing" aria-hidden="true"></svg>
+      <div class="t"><strong>Fit to priorities</strong><span id="fitText"></span></div>
+    </div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="Live service summary"></section>
+
+  <div class="main">
+    <div class="col">
+      <section class="card">
+        <div class="card-h">
+          <div><h2>Live throughput</h2><p>Primary route, last 2 minutes, sampled every 2 seconds</p></div>
+          <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Google traffic (Tbps)</span><span><i class="sw" style="background:var(--ink-2)"></i>Lit capacity</span><span><i class="sw" style="background:var(--s2)"></i>Burst trigger</span></div>
+        </div>
+        <div class="chartbox" id="liveBox"><svg id="liveSvg" viewBox="0 0 680 240" role="img" aria-label="Live throughput chart"></svg><div class="tip" id="liveTip"></div></div>
+      </section>
+
+      <section class="card">
+        <div class="card-h">
+          <div><h2>Route health</h2><p>Primary and diverse backup paths, with in-line amplifier (ILA) huts</p></div>
+          <div class="legend"><span><i class="sw" style="background:var(--s1)"></i>Primary · 640 km</span><span><i class="sw" style="background:var(--s2)"></i>Backup · 780 km</span></div>
+        </div>
+        <div class="chartbox" style="overflow-x:auto"><svg id="routeSvg" viewBox="0 0 680 210" role="img" aria-label="Route schematic" style="min-width:520px"></svg></div>
+        <div class="route-meta" id="routeMeta"></div>
+      </section>
+
+      <div class="two">
+        <section class="card">
+          <div class="card-h"><div><h2>Capacity forecast</h2><p>Projected monthly peak vs. lit capacity</p></div></div>
+          <div class="chartbox" id="fcBox"><svg id="fcSvg" viewBox="0 0 420 230" role="img" aria-label="Capacity forecast chart"></svg><div class="tip" id="fcTip"></div></div>
+          <p class="annot" id="fcNote" style="margin:8px 0 0;font-size:12.5px"></p>
+        </section>
+        <section class="card">
+          <div class="card-h"><div><h2>Recommended for your priorities</h2><p>Stage a change, then review its cost in the rail</p></div></div>
+          <div class="recs" id="recs"></div>
+        </section>
+      </div>
+
+      <section class="card">
+        <div class="card-h">
+          <div><h2>Monthly cost</h2><p>Run-rate for the applied configuration; staged changes show as a difference</p></div>
+          <span class="pill" id="costPill"></span>
+        </div>
+        <div class="barlist" id="costList"></div>
+        <div class="unit" id="unitCosts"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-h">
+          <div><h2>Maintenance around heavy workloads</h2><p>Predicted load for the next 7 days (% of lit capacity). Outlined cells are booked maintenance windows.</p></div>
+          <div class="legend" id="heatLegend"></div>
+        </div>
+        <div style="overflow-x:auto"><div class="heat" id="heat" style="min-width:420px"></div></div>
+        <div class="tasks" id="tasks"></div>
+      </section>
+
+      <div class="two">
+        <section class="card">
+          <div class="card-h"><div><h2>Predictive maintenance</h2><p>ILA Hut 6 amplifier, signal quality (OSNR) over 30 days</p></div></div>
+          <div class="chartbox" id="osnrBox"><svg id="osnrSvg" viewBox="0 0 420 170" role="img" aria-label="OSNR trend for ILA Hut 6"></svg><div class="tip" id="osnrTip"></div></div>
+          <p style="margin:8px 0 0;font-size:12.5px;color:var(--ink-2)" id="osnrNote"></p>
+        </section>
+        <section class="card">
+          <div class="card-h"><div><h2>Alerts and notices</h2><p>What the account team has flagged</p></div></div>
+          <ul class="feed" id="feed"></ul>
+        </section>
+      </div>
+    </div>
+
+    <aside class="rail" aria-label="Network settings">
+      <section class="card">
+        <div class="card-h"><div><h2>Network settings</h2><p>Changes are staged until you apply them</p></div></div>
+        <div class="ctl" id="ctl"></div>
+      </section>
+
+      <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+        <section class="card pending clean" id="pendCard">
+          <div class="card-h"><div><h2>Staged changes</h2></div><span class="eyebrow" id="pendCount"></span></div>
+          <div id="pendBody"></div>
+        </section>
+        <section class="card">
+          <div class="card-h"><div><h2>Change log</h2></div></div>
+          <ul class="log" id="log"></ul>
+        </section>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const ROUTE={km:640,backupKm:780,huts:9};
+const DEFAULT={pairs:2,waves:48,rate:800,backup:'standby',enc:'customer',autoscale:true,scaleAt:85,support:'premium',maint:'lowload',cls:{training:60,inference:25,replication:15}};
+const PRESETS=[
+  ['training','AI training sync',{speed:5,resilience:4,cost:2,sustain:2}],
+  ['balanced','Balanced',{speed:3,resilience:3,cost:3,sustain:3}],
+  ['cost','Lowest cost',{speed:2,resilience:3,cost:5,sustain:3}],
+  ['resilience','Maximum uptime',{speed:3,resilience:5,cost:2,sustain:2}],
+  ['green','Sustainability',{speed:3,resilience:3,cost:3,sustain:5}]];
+const PRI_META=[['speed','Speed & headroom'],['resilience','Reliability'],['cost','Cost'],['sustain','Sustainability']];
+const LEVEL=['','Low','Some','Medium','High','Top'];
+const SUPPORT={standard:{n:'Standard',c:6000,mttr:8,desc:'Business hours, 8 h restore'},premium:{n:'Premium 24/7',c:18000,mttr:4,desc:'24/7 team, 4 h restore'},onsite:{n:'On-site',c:34000,mttr:2,desc:'On-site crews, 2 h restore, repair before failure'}};
+const ENC={customer:{n:'Customer keys',c:3200,desc:'Google holds the keys (L1 optical encryption)'},verizon:{n:'Verizon keys',c:1500,desc:'Verizon manages keys in HSM'},app:{n:'In-app only',c:0,desc:'Google encrypts above the optical layer'}};
+const BACKUP={none:{n:'Off',f:0,avail:99.95},standby:{n:'Standby',f:.55,avail:99.99},active:{n:'Active-active',f:1,avail:99.999}};
+const MAINT={lowload:{n:'Lowest load',desc:'Auto-book the quietest 2-hour windows'},fixed:{n:'Sunday 1–5 am',desc:'Fixed weekly window'},approve:{n:'Ask first',desc:'Hold each window for Google approval'}};
+const CLS=[['training','AI training sync','var(--s1)'],['inference','Inference serving','var(--s2)'],['replication','Storage replication','var(--muted)']];
+
+function load(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v?Object.assign(structuredClone(d),v):structuredClone(d)}catch(e){return structuredClone(d)}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+let applied=load('aic.cfg',DEFAULT);
+let pend=structuredClone(applied);
+let pri=load('aic.pri',PRESETS[0][2]);
+let log=(()=>{try{return JSON.parse(localStorage.getItem('aic.log'))||null}catch(e){return null}})()||[
+  {t:'Oct 16, 09:42',who:'Google NetOps',what:'Raised wavelengths per pair 40 → 48',d:2900},
+  {t:'Oct 9, 14:10',who:'Verizon account team',what:'Turned on burst auto-scale at 85%',d:4000},
+  {t:'Oct 1, 08:00',who:'Verizon',what:'Primary route accepted into service',d:0}];
+let confirming=false;
+
+const fmt$=n=>'$'+Math.round(n).toLocaleString('en-US');
+const fmtK=n=>'$'+(n/1000).toFixed(n>=100000?0:1)+'k';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const capOf=c=>c.pairs*c.waves*c.rate/1000;
+
+/* ---- demand model ---- */
+function diurnal(h){return .74+.2*Math.sin((h-9)/24*2*Math.PI)+.06*Math.sin((h-2)/12*2*Math.PI)}
+const BASE_PEAK=56; // Tbps today
+function predLoad(dayIdx,h,cfg){const dow=(new Date(Date.now()+dayIdx*864e5)).getDay();const wk=(dow===0||dow===6)?.86:1;return BASE_PEAK*diurnal(h)*wk*(1+dayIdx*.0015)/capOf(cfg)*100}
+function forecast(){const out=[];const d=new Date();for(let i=1;i<=12;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,1);out.push({m,label:m.toLocaleString('en-US',{month:'short'}),y:m.getFullYear(),peak:BASE_PEAK*Math.pow(1.042,i)})}return out}
+
+/* ---- economics ---- */
+function econ(c){
+  const lease=c.pairs*ROUTE.km*26;
+  const backup=c.pairs*ROUTE.backupKm*26*BACKUP[c.backup].f;
+  const huts=c.pairs*ROUTE.huts*650*(c.backup==='active'?1.8:1);
+  const burst=c.autoscale?4000:0;
+  const enc=ENC[c.enc].c;
+  const sup=SUPPORT[c.support].c;
+  const optics=c.pairs*c.waves*(c.rate===800?38:30);
+  const lines=[['Fiber lease, primary route',lease],['Diverse backup route',backup],['Amplifier huts & power',huts],['Optics maintenance',optics],['Support tier',sup],['Encryption key service',enc],['Burst capacity reserve',burst]];
+  const total=lines.reduce((a,b)=>a+b[1],0);
+  const watts=c.pairs*c.waves*2*(c.rate===800?16:21)+c.pairs*ROUTE.huts*300*(c.backup==='active'?1.8:1);
+  const kwh=watts*730/1000;
+  const co2=kwh*.36/1000; // t
+  const avgTbps=BASE_PEAK*.74;
+  const pb=avgTbps*2.628e6/8/1000; // PB per month
+  return {lines,total,kwh,co2,pb,perPB:total/pb,gPerPB:co2*1e6/pb};
+}
+function scores(c){
+  const cap=capOf(c);const fc=forecast();const peak6=fc[5].peak;
+  const head=1-peak6/cap;
+  const speed=clamp(Math.round((head+.05)/.4*100)+(c.rate===800?6:0),5,100);
+  const e=econ(c);const minCost=econ({...c,pairs:Math.max(1,Math.ceil(peak6/.85/(64*.8))),waves:64,rate:800,backup:'none',support:'standard',enc:'app',autoscale:false}).total;
+  const cost=clamp(Math.round(minCost/e.total*130),5,100);
+  const res=clamp({none:35,standby:72,active:92}[c.backup]+{standard:-6,premium:4,onsite:8}[c.support]+(c.autoscale?2:0),5,100);
+  const util=BASE_PEAK*.74/cap;
+  const sustain=clamp(Math.round(util*90+(c.rate===800?22:0)-(c.backup==='active'?8:0)),5,100);
+  return {speed,cost,resilience:res,sustain};
+}
+function fit(c){const s=scores(c);let w=0,t=0;for(const[k] of PRI_META){w+=pri[k];t+=pri[k]*s[k]}return Math.round(t/w)}
+
+/* ---- priorities UI ---- */
+function renderPri(){
+  $('#presets').innerHTML=PRESETS.map(([k,n,v])=>`<button class="chip" data-p="${k}" aria-pressed="${PRI_META.every(([m])=>v[m]===pri[m])}">${n}</button>`).join('');
+  $('#sliders').innerHTML=PRI_META.map(([k,n])=>`<div class="sl"><div class="row"><b><label for="pri-${k}">${n}</label></b><span class="v">${LEVEL[pri[k]]}</span></div><input type="range" id="pri-${k}" min="1" max="5" step="1" value="${pri[k]}" data-k="${k}"></div>`).join('');
+}
+$('#presets').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;pri={...PRESETS.find(p=>p[0]===b.dataset.p)[2]};save('aic.pri',pri);renderPri();renderDerived()});
+$('#sliders').addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;pri[k]=+e.target.value;save('aic.pri',pri);e.target.previousElementSibling.querySelector('.v').textContent=LEVEL[pri[k]];
+  document.querySelectorAll('#presets .chip').forEach(c=>{const v=PRESETS.find(p=>p[0]===c.dataset.p)[2];c.setAttribute('aria-pressed',PRI_META.every(([m])=>v[m]===pri[m]))});renderDerived()});
+function renderFit(){
+  const a=fit(applied),p=fit(pend),dirty=isDirty();
+  const r=26,C=2*Math.PI*r;
+  const arc=(v,col,dash)=>`<circle cx="32" cy="32" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C*v/100} ${C}" transform="rotate(-90 32 32)" ${dash?'opacity=".45"':''}/>`;
+  $('#fitRing').innerHTML=`<circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--line)" stroke-width="6"/>${dirty&&p>a?arc(p,'var(--accent)',1):''}${arc(dirty&&p<a?p:a,'var(--accent)')}<text x="32" y="37" text-anchor="middle" style="font:600 17px var(--display);fill:var(--ink)">${dirty?p:a}</text>`;
+  const s=scores(dirty?pend:applied);const weakest=PRI_META.filter(([k])=>pri[k]>=3).sort((x,y)=>s[x[0]]-s[y[0]])[0];
+  $('#fitText').textContent=(dirty?`Staged changes move this ${p>=a?'up':'down'} from ${a}. `:'')+(weakest?`Weakest area you care about: ${weakest[1].toLowerCase()} (${s[weakest[0]]}).`:'');
+}
+
+/* ---- live simulation ---- */
+const hist=[];let burstOn=false,overTicks=0,underTicks=0,burstTicks=0,spike=0;
+function effCap(){return capOf(applied)+(burstOn?applied.waves*applied.rate/1000:0)}
+function sample(){
+  const now=new Date();const h=now.getHours()+now.getMinutes()/60;
+  if(spike<=0&&Math.random()<.04)spike=8+Math.floor(Math.random()*10);
+  const sp=spike>0?(spike--,BASE_PEAK*.16):0;
+  let d=BASE_PEAK*diurnal(h)*(1+(Math.random()-.5)*.05)+sp;
+  const cap=capOf(applied);
+  const util=d/effCap();
+  if(applied.autoscale){if(d/cap*100>applied.scaleAt){overTicks++;underTicks=0}else{underTicks++;overTicks=0}
+    if(!burstOn&&overTicks>=3){burstOn=true;pushFeed('warn','Burst pair lit','Traffic held above '+applied.scaleAt+'% for 6 s. A reserve fiber pair is carrying the overflow.')}
+    if(burstOn&&underTicks>=8){burstOn=false;pushFeed('good','Burst pair released','Load is back under the trigger. Reserve pair returned to dark.')}}
+  else burstOn=false;
+  if(burstOn)burstTicks++;
+  const ec=effCap();const thr=Math.min(d,ec);const u=thr/ec;
+  const lat=3.21+(u>.82?(u-.82)*3.2:0)+Math.random()*.02;
+  const loss=d>ec?((d-ec)/d*100):(u>.93?.0008:.0001)*(1+Math.random());
+  hist.push({t:now,d:thr,demand:d,cap:ec,lat,loss});if(hist.length>60)hist.shift();
+}
+let feedItems=[
+  {t:'08:14',k:'serious',s:'Predicted',title:'Hut 6 amplifier drifting',body:'Gain has dropped 0.4 dB in 14 days. A swap is booked in the next low-load window.'},
+  {t:'Yesterday',k:'good',s:'Resolved',title:'Splice loss cleared on Segment 3',body:'Restored in 1 h 12 min on backup route with no packet loss.'},
+  {t:'Oct 15',k:'warn',s:'Notice',title:'Last-mile build into Pryor campus',body:'Second building entrance is 3 weeks behind. Primary entrance is unaffected.'},
+  {t:'Oct 12',k:'good',s:'Report',title:'Weekly network report sent',body:'Availability 100.000%, median latency 3.22 ms, 0 security events.'}];
+function pushFeed(k,title,body){const t=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});feedItems.unshift({t,k,s:{good:'Resolved',warn:'Live',serious:'Watch',crit:'Critical'}[k],title,body});feedItems=feedItems.slice(0,6);renderFeed()}
+function renderFeed(){$('#feed').innerHTML=feedItems.map(f=>`<li><time>${f.t}</time><div><span class="pill ${f.k}">${f.s}</span><div><b>${f.title}</b></div><div style="color:var(--ink-2)">${f.body}</div></div></li>`).join('')}
+
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x)));const n=x/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
+
+function renderKpis(){
+  const last=hist[hist.length-1];if(!last)return;
+  const e=econ(applied);const u=last.d/last.cap*100;
+  const avail=BACKUP[applied.backup].avail;
+  const lat=last.lat, loss=last.loss;
+  const tile=(lbl,val,unit,pill,foot)=>`<div class="kpi"><span class="lbl">${lbl}</span><span class="val">${val}<small>${unit}</small></span>${pill}<span class="foot">${foot}</span></div>`;
+  const pill=(k,t)=>`<span class="pill ${k}">${t}</span>`;
+  $('#kpis').innerHTML=
+    tile('Throughput',last.d.toFixed(1),'Tbps',u>95?pill('crit','Saturated'):u>applied.scaleAt?pill('serious','Above trigger'):u>75?pill('warn','Busy'):pill('good','Headroom'),`${u.toFixed(0)}% of ${last.cap.toFixed(1)} Tbps lit${burstOn?' · burst on':''}`)+
+    tile('Latency, one-way',lat.toFixed(2),'ms',lat<=3.5?pill('good','Within SLA'):pill('serious','Over SLA'),'SLA ≤ 3.50 ms · 640 km path')+
+    tile('Packet loss',loss<.01?loss.toFixed(4):loss.toFixed(2),'%',loss<.001?pill('good','Clean'):loss<.1?pill('warn','Elevated'):pill('crit','Dropping'),'Target < 0.001%')+
+    tile('Availability, 30 day','100.000','%',pill('good','Meets SLA'),`Committed ${avail}% · backup ${BACKUP[applied.backup].n.toLowerCase()}`)+
+    tile('Monthly run-rate',fmtK(e.total),'',isDirty()?pill('warn','Changes staged'):pill('good','Applied'),`${fmt$(e.perPB)} per PB moved`)+
+    tile('Carbon',e.co2.toFixed(2),'t CO₂e/mo',e.gPerPB<200?pill('good','Low'):pill('warn','Moderate'),`${e.kwh.toLocaleString('en-US',{maximumFractionDigits:0})} kWh · ${Math.round(e.gPerPB)} kg per PB`.replace(' kg',' g'));
+}
+
+function renderLive(){
+  const W=680,H=240,L=44,R=74,T=12,B=26,pw=W-L-R,ph=H-T-B;
+  if(!hist.length)return;
+  const capNow=capOf(applied);
+  const max=Math.max(capNow*1.12,...hist.map(p=>Math.max(p.demand,p.cap)*1.05));
+  const step=niceStep(max/4);const ymax=Math.ceil(max/step)*step;
+  const x=i=>L+pw*(i/(59));const y=v=>T+ph*(1-v/ymax);
+  const off=60-hist.length;
+  let g='';for(let v=0;v<=ymax+1e-9;v+=step){g+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${v}</text>`}
+  const pts=hist.map((p,i)=>[x(i+off),y(p.d)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area=line+` L${pts[pts.length-1][0]} ${y(0)} L${pts[0][0]} ${y(0)} Z`;
+  const capPath=hist.map((p,i)=>(i?'L':'M')+x(i+off).toFixed(1)+' '+y(p.cap).toFixed(1)).join(' ');
+  const trig=y(capNow*applied.scaleAt/100);
+  const lp=pts[pts.length-1],lc=hist[hist.length-1];
+  const xt=[0,20,40,59].map(i=>`<text class="axis" x="${x(i)}" y="${H-8}" text-anchor="${i===0?'start':i===59?'end':'middle'}">${i===59?'now':'−'+((59-i)*2)+'s'}</text>`).join('');
+  $('#liveSvg').innerHTML=`${g}${xt}
+   <path d="${area}" fill="var(--s1-soft)"/>
+   ${applied.autoscale?`<line x1="${L}" x2="${L+pw}" y1="${trig}" y2="${trig}" stroke="var(--s2)" stroke-width="1.5" stroke-dasharray="4 4"/><text class="annot" x="${L+pw+6}" y="${trig+4}">${applied.scaleAt}% trigger</text>`:''}
+   <path d="${capPath}" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="1 0"/>
+   <text class="annot" x="${L+pw+6}" y="${y(lc.cap)+4}">${lc.cap.toFixed(1)} lit</text>
+   <path d="${line}" fill="none" stroke="var(--s1)" stroke-width="2" stroke-linejoin="round"/>
+   <circle cx="${lp[0]}" cy="${lp[1]}" r="4.5" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>
+   <text x="${L+pw+6}" y="${Math.min(H-B,Math.max(T+10,lp[1]+4+(Math.abs(lp[1]-y(lc.cap))<14?14:0)))}" style="font:600 12px var(--mono);fill:var(--ink)">${lc.d.toFixed(1)}</text>
+   <g id="liveHover"></g><rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent" id="liveHit"/>`;
+  bindHover('#liveSvg','#liveHit','#liveTip','#liveHover',W,(px)=>{const i=Math.round((px-L)/pw*59)-off;const p=hist[clamp(i,0,hist.length-1)];const xi=x(clamp(i,0,hist.length-1)+off);
+    return {x:xi,y:y(p.d),html:`<div>${p.t.toLocaleTimeString('en-US',{hour12:false})}</div><div>Traffic <b>${p.d.toFixed(1)} Tbps</b></div><div>Capacity <b>${p.cap.toFixed(1)}</b> · Latency <b>${p.lat.toFixed(2)} ms</b></div>`,g:`<line x1="${xi}" x2="${xi}" y1="${T}" y2="${T+ph}" stroke="var(--muted)" stroke-width="1"/><circle cx="${xi}" cy="${y(p.d)}" r="4" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>`}});
+}
+const hoverState={};
+function bindHover(svgSel,hitSel,tipSel,gSel,W,fn){
+  const svg=$(svgSel),hit=$(hitSel),tip=$(tipSel);
+  const show=ev=>{const r=svg.getBoundingClientRect();const px=(ev.clientX-r.left)/r.width*W;hoverState[svgSel]=px;draw(px)};
+  const draw=px=>{const o=fn(px);if(!o)return;$(gSel).innerHTML=o.g;const r=svg.getBoundingClientRect();const box=svg.parentElement.getBoundingClientRect();tip.innerHTML=o.html;tip.style.display='block';
+    const vb=svg.viewBox.baseVal;const sx=r.width/vb.width;tip.style.left=clamp(o.x*sx+(r.left-box.left),70,box.width-70)+'px';tip.style.top=(o.y*(r.height/vb.height)+(r.top-box.top)-10)+'px'};
+  hit.addEventListener('pointermove',show);
+  hit.addEventListener('pointerleave',()=>{hoverState[svgSel]=null;tip.style.display='none';$(gSel).innerHTML=''});
+  if(hoverState[svgSel]!=null)draw(hoverState[svgSel]);
+}
+
+/* ---- route ---- */
+function renderRoute(){
+  const st=(i)=>i===5?'var(--serious)':'var(--good)';
+  const px=[40,108,176,244,312,380,448,516,584,640];
+  let s=`<text class="annot" x="40" y="22" text-anchor="start" style="font-weight:600;fill:var(--ink)">Council Bluffs, IA</text><text class="annot" x="640" y="22" text-anchor="end" style="font-weight:600;fill:var(--ink)">Pryor, OK</text>`;
+  s+=`<path d="M40 70 L640 70" stroke="var(--s1)" stroke-width="4" fill="none"/>`;
+  const bOpacity=applied.backup==='none'?.3:1;
+  s+=`<path d="M40 70 C 60 150, 120 150, 160 150 L 520 150 C 560 150, 620 150, 640 70" stroke="var(--s2)" stroke-width="3" fill="none" stroke-dasharray="${applied.backup==='standby'?'6 5':applied.backup==='none'?'2 6':'0'}" opacity="${bOpacity}"/>`;
+  for(let i=1;i<=ROUTE.huts;i++){const xx=px[i-1]+ (px[i]-px[i-1])/2+ (i===1?0:0);}
+  for(let i=1;i<=ROUTE.huts;i++){const xx=40+600*i/(ROUTE.huts+1);
+    s+=`<g><title>ILA Hut ${i}${i===6?' · amplifier gain drifting, swap booked':' · healthy'}</title><rect x="${xx-7}" y="63" width="14" height="14" rx="3" fill="var(--panel)" stroke="${st(i)}" stroke-width="2.5"/><text class="axis" x="${xx}" y="96" text-anchor="middle">H${i}</text></g>`}
+  s+=`<circle cx="40" cy="70" r="9" fill="var(--accent)" stroke="var(--panel)" stroke-width="3"/><circle cx="640" cy="70" r="9" fill="var(--accent)" stroke="var(--panel)" stroke-width="3"/>`;
+  s+=`<text class="axis" x="340" y="168" text-anchor="middle">Backup via Lincoln · Wichita · Tulsa — ${BACKUP[applied.backup].n.toLowerCase()}</text>`;
+  const xx6=40+600*6/(ROUTE.huts+1);
+  s+=`<line x1="${xx6}" y1="56" x2="${xx6}" y2="40" stroke="var(--serious)" stroke-width="1.5"/><text class="annot" x="${xx6}" y="35" text-anchor="middle">Hut 6 · gain −0.4 dB</text>`;
+  s+=`<text class="annot" x="620" y="198" text-anchor="end">Last mile into Pryor campus: entrance B delayed 3 wks</text><line x1="625" y1="194" x2="636" y2="82" stroke="var(--warn)" stroke-width="1.2" stroke-dasharray="2 3"/>`;
+  $('#routeSvg').innerHTML=s;
+  const c=applied;
+  $('#routeMeta').innerHTML=[['Lit fiber pairs',`${c.pairs} of 8 leased`],['Wavelengths',`${c.waves} × ${c.rate}G`],['Encryption',ENC[c.enc].n],['Restore commitment',`${SUPPORT[c.support].mttr} h · ${SUPPORT[c.support].n}`]].map(([a,b])=>`<div class="mini"><span class="lbl">${a}</span><b>${b}</b></div>`).join('');
+}
+
+/* ---- forecast ---- */
+function renderForecast(){
+  const W=420,H=230,L=40,R=12,T=14,B=28,pw=W-L-R,ph=H-T-B;
+  const fc=forecast();const ca=capOf(applied),cp=capOf(pend),dirty=ca!==cp;
+  const max=Math.max(ca,cp,fc[11].peak)*1.1;const step=niceStep(max/4);const ymax=Math.ceil(max/step)*step;
+  const y=v=>T+ph*(1-v/ymax);const bw=pw/12;
+  let s='';for(let v=0;v<=ymax+1e-9;v+=step)s+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${v}</text>`;
+  fc.forEach((f,i)=>{const x=L+i*bw+2,w=bw-4,top=y(f.peak);s+=`<path d="M${x} ${y(0)} L${x} ${top+3} Q${x} ${top} ${x+3} ${top} L${x+w-3} ${top} Q${x+w} ${top} ${x+w} ${top+3} L${x+w} ${y(0)} Z" fill="${f.peak>ca*applied.scaleAt/100?'var(--s2)':'var(--s1)'}"/>`;
+    if(i%2===0||i===11)s+=`<text class="axis" x="${x+w/2}" y="${H-10}" text-anchor="middle">${f.label}</text>`});
+  s+=`<line x1="${L}" x2="${L+pw}" y1="${y(ca)}" y2="${y(ca)}" stroke="var(--ink-2)" stroke-width="2"/><text class="annot" x="${L+4}" y="${y(ca)-5}">Applied ${ca.toFixed(1)} Tbps</text>`;
+  if(dirty)s+=`<line x1="${L}" x2="${L+pw}" y1="${y(cp)}" y2="${y(cp)}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/><text class="annot" x="${L+pw-4}" y="${y(cp)-5}" text-anchor="end" style="fill:var(--accent)">Staged ${cp.toFixed(1)}</text>`;
+  s+=`<g id="fcHover"></g><rect id="fcHit" x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent"/>`;
+  $('#fcSvg').innerHTML=s;
+  const over=fc.find(f=>f.peak>ca*applied.scaleAt/100),full=fc.find(f=>f.peak>ca);
+  const overP=fc.find(f=>f.peak>cp*pend.scaleAt/100);
+  $('#fcNote').innerHTML=(over?`Orange bars cross the ${applied.scaleAt}% burst trigger, starting <b>${over.label} ${over.y}</b>.`:`Peaks stay under the ${applied.scaleAt}% trigger for 12 months.`)+(full?` Peak demand exceeds lit capacity in <b>${full.label} ${full.y}</b>.`:'')+(dirty?` With staged changes: ${overP?'trigger crossed in '+overP.label+' '+overP.y:'no crossing in 12 months'}.`:'');
+  bindHover('#fcSvg','#fcHit','#fcTip','#fcHover',W,px=>{const i=clamp(Math.floor((px-L)/bw),0,11);const f=fc[i];const cx=L+i*bw+bw/2;return {x:cx,y:y(f.peak),html:`<div>${f.label} ${f.y}</div><div>Projected peak <b>${f.peak.toFixed(1)} Tbps</b></div><div><b>${(f.peak/ca*100).toFixed(0)}%</b> of applied capacity</div>`,g:`<rect x="${L+i*bw}" y="${T}" width="${bw}" height="${ph}" fill="var(--ink)" opacity=".05"/>`}});
+}
+
+/* ---- recommendations ---- */
+function recs(){
+  const c=pend,fc=forecast(),cap=capOf(c),out=[];
+  const p6=fc[5].peak/cap;
+  if(c.waves<64&&p6>.8)out.push({w:pri.speed*2+pri.cost,t:`Add ${Math.min(16,64-c.waves)} wavelengths per pair`,d:`Lifts capacity to ${capOf({...c,waves:Math.min(64,c.waves+16)}).toFixed(1)} Tbps on fiber you already lease. Hitless, about 30 minutes.`,why:'Speed · cheapest way to add headroom',a:{waves:Math.min(64,c.waves+16)}});
+  if(p6>.85&&c.pairs<8)out.push({w:pri.speed*2+pri.resilience,t:'Light one more fiber pair',d:`Six-month peak reaches ${(p6*100).toFixed(0)}% of capacity. A third pair keeps AI training syncs off the burst reserve.`,why:'Speed · forecast growth 4.2% a month',a:{pairs:c.pairs+1}});
+  if(c.backup!=='active')out.push({w:pri.resilience*2,t:'Run the backup route active-active',d:`Commitment rises to 99.999% and maintenance never needs a traffic shift. About ${fmtK(econ({...c,backup:'active'}).total-econ(c).total)} more a month.`,why:'Reliability',a:{backup:'active'}});
+  if(c.backup==='active'&&pri.cost>=4&&pri.resilience<=3)out.push({w:pri.cost*2,t:'Move backup route to standby',d:`Saves ${fmtK(econ(c).total-econ({...c,backup:'standby'}).total)} a month and keeps a 99.99% commitment.`,why:'Cost',a:{backup:'standby'}});
+  if(p6<.55&&c.pairs>1)out.push({w:pri.cost*2+pri.sustain,t:'Return one fiber pair to dark',d:`Peak stays under ${(fc[5].peak/capOf({...c,pairs:c.pairs-1})*100).toFixed(0)}% on ${c.pairs-1} pair(s). Saves ${fmtK(econ(c).total-econ({...c,pairs:c.pairs-1}).total)} a month.`,why:'Cost · Sustainability',a:{pairs:c.pairs-1}});
+  if(c.rate===400)out.push({w:pri.sustain*2+pri.speed,t:'Upgrade to 800G optics',d:'Doubles capacity per wavelength and cuts watts per bit by about 40%.',why:'Sustainability · Speed',a:{rate:800}});
+  if(c.support==='onsite'&&pri.cost>=4)out.push({w:pri.cost*1.5,t:'Drop to Premium 24/7 support',d:`Restore commitment goes from 2 h to 4 h. Saves ${fmtK(SUPPORT.onsite.c-SUPPORT.premium.c)} a month.`,why:'Cost',a:{support:'premium'}});
+  if(c.support!=='onsite'&&pri.resilience>=5)out.push({w:pri.resilience*1.6,t:'Add on-site repair crews',d:'2-hour restore, and predicted failures are fixed before they happen.',why:'Reliability',a:{support:'onsite'}});
+  if(!c.autoscale)out.push({w:pri.speed*1.5+pri.resilience,t:'Turn on burst auto-scale',d:'A reserve pair lights automatically when traffic holds above the trigger.',why:'Speed',a:{autoscale:true}});
+  if(c.maint!=='lowload'&&pri.speed>=4)out.push({w:pri.speed,t:'Book maintenance in lowest-load windows',d:'Avoids the weekday 10 am–6 pm training peaks.',why:'Speed · Reliability',a:{maint:'lowload'}});
+  if(c.enc!=='customer'&&pri.resilience>=3)out.push({w:pri.resilience+3,t:'Hold your own encryption keys',d:'Verizon never sees key material. Matches the security control asked for in the requirements.',why:'Security',a:{enc:'customer'}});
+  return out.sort((a,b)=>b.w-a.w).slice(0,4);
+}
+function renderRecs(){
+  const r=recs();window.__recs=r;
+  $('#recs').innerHTML=r.length?r.map((x,i)=>`<div class="rec"><b>${x.t}</b><p>${x.d}</p><span class="why">${x.why}</span><button class="btn" data-rec="${i}">Stage</button></div>`).join(''):'<p class="empty">Your staged settings already match these priorities. Nothing to recommend.</p>';
+}
+$('#recs').addEventListener('click',e=>{const b=e.target.closest('[data-rec]');if(!b)return;Object.assign(pend,window.__recs[+b.dataset.rec].a);confirming=false;renderCtl();renderDerived();toast('Staged. Review it under Staged changes.')});
+
+/* ---- costs ---- */
+function renderCosts(){
+  const a=econ(applied),p=econ(pend),dirty=isDirty();
+  const max=Math.max(...a.lines.map(l=>l[1]),...p.lines.map(l=>l[1]));
+  $('#costList').innerHTML=a.lines.map((l,i)=>{const d=p.lines[i][1]-l[1];return `<div class="bl"><span>${l[0]}</span><div class="track"><div class="fill" style="width:${l[1]/max*100}%"></div></div><span class="v">${fmt$(l[1])}</span><span class="d ${d>0?'up':d<0?'down':''}">${dirty&&Math.round(d)!==0?(d>0?'+':'−')+fmt$(Math.abs(d)).slice(0):''}</span></div>`}).join('')+
+   `<div class="bl total"><span>Total per month</span><span></span><span class="v">${fmt$(a.total)}</span><span class="d ${p.total>a.total?'up':p.total<a.total?'down':''}">${dirty&&Math.round(p.total-a.total)!==0?(p.total>a.total?'+':'−')+fmt$(Math.abs(p.total-a.total)):''}</span></div>`;
+  const budget=180000;
+  $('#costPill').className='pill '+(a.total>budget?'serious':a.total>budget*.85?'warn':'good');
+  $('#costPill').textContent=`${Math.round(a.total/budget*100)}% of ${fmtK(budget)} monthly budget`;
+  $('#unitCosts').innerHTML=[['Cost per PB moved',fmt$(a.perPB),fmt$(p.perPB)],['Cost per lit Tbps',fmt$(a.total/capOf(applied)),fmt$(p.total/capOf(pend))],['Annual commitment',fmtK(a.total*12),fmtK(p.total*12)]].map(([l,v,pv])=>`<div class="mini"><span class="lbl">${l}</span><b>${v}</b>${dirty&&pv!==v?` <span style="color:var(--muted);font-size:12px">→ ${pv}</span>`:''}</div>`).join('');
+}
+
+/* ---- maintenance ---- */
+function maintPlan(cfg){
+  const tasks=[{n:'Amplifier module swap, ILA Hut 6',dur:2,day:[3,6]},{n:'Splice enclosure inspection, Segment 4',dur:2,day:[1,6]},{n:'Line amplifier firmware update',dur:1,day:[0,6]}];
+  const used=new Set();
+  return tasks.map(t=>{let best=null;
+    if(cfg.maint==='fixed'){const today=new Date().getDay();let d=(7-today)%7;if(d===0&&new Date().getHours()>=1)d=0;best={d,h:1+tasks.indexOf(t)*1}}
+    else{for(let d=t.day[0];d<=t.day[1];d++)for(let h=0;h<=24-t.dur;h++){if(d===0&&h<=new Date().getHours())continue;let s=0,clash=false;for(let k=0;k<t.dur;k++){s+=predLoad(d,h+k,cfg);if(used.has(d+':'+(h+k)))clash=true}if(clash)continue;if(!best||s<best.s)best={d,h,s}}}
+    for(let k=0;k<t.dur;k++)used.add(best.d+':'+(best.h+k));
+    return {...t,...best}});
+}
+function renderMaint(){
+  const plan=maintPlan(applied);const wins=new Set();plan.forEach(p=>{for(let k=0;k<p.dur;k++)wins.add(p.d+':'+(p.h+k))});
+  const col=v=>v<45?'var(--seq0)':v<55?'var(--seq1)':v<65?'var(--seq2)':v<75?'var(--seq3)':v<85?'var(--seq4)':'var(--seq5)';
+  let s='<span></span>'+Array.from({length:24},(_,h)=>`<span class="h">${h%3===0?h:''}</span>`).join('');
+  for(let d=0;d<7;d++){const dt=new Date(Date.now()+d*864e5);s+=`<span style="align-self:center">${dt.toLocaleDateString('en-US',{weekday:'short'})} ${dt.getDate()}</span>`;
+    for(let h=0;h<24;h++){const v=predLoad(d,h,applied);s+=`<span class="c${wins.has(d+':'+h)?' win':''}" style="background:${col(v)}" title="${dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} ${String(h).padStart(2,'0')}:00 · ${v.toFixed(0)}% predicted load${wins.has(d+':'+h)?' · maintenance':''}"></span>`}}
+  $('#heat').innerHTML=s;
+  $('#heatLegend').innerHTML=[['<45','--seq0'],['55','--seq1'],['65','--seq2'],['75','--seq3'],['85','--seq4'],['85+','--seq5']].map(([l,v])=>`<span><i class="dot" style="background:var(${v});border:1px solid var(--line)"></i>${l}%</span>`).join('')+`<span><i class="dot" style="outline:2px solid var(--s2);outline-offset:-1px"></i>Maintenance</span>`;
+  const shift=applied.backup==='none';
+  $('#tasks').innerHTML=plan.map(p=>{const dt=new Date(Date.now()+p.d*864e5);const load=predLoad(p.d,p.h,applied);
+    return `<div class="task"><b>${p.n}</b><span class="when">${dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})} · ${String(p.h).padStart(2,'0')}:00–${String(p.h+p.dur).padStart(2,'0')}:00 CT</span>
+    <span class="imp">${shift?'<span class="pill crit">Outage risk</span> No backup route is enabled, so traffic stops during this window.':`<span class="pill good">No impact</span> Traffic moves to the backup route. Predicted load ${load.toFixed(0)}%.`} ${applied.maint==='approve'?'<span class="pill warn">Awaiting Google approval</span>':'Google notified 72 h ahead.'}</span></div>`}).join('');
+}
+
+/* ---- OSNR ---- */
+function renderOsnr(){
+  const W=420,H=170,L=36,R=14,T=12,B=24,pw=W-L-R,ph=H-T-B;
+  const data=[];let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280};
+  for(let i=0;i<30;i++)data.push(21.4-(i>14?(i-14)*.085:0)-i*.008+(rnd()-.5)*.18);
+  const ymin=17,ymax=22;const x=i=>L+pw*i/29,y=v=>T+ph*(1-(v-ymin)/(ymax-ymin));
+  let s='';for(let v=ymin;v<=ymax;v++)s+=`<line class="gridl" x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}"/><text class="axis" x="${L-6}" y="${y(v)+3.5}" text-anchor="end">${v}</text>`;
+  s+=`<line x1="${L}" x2="${L+pw}" y1="${y(18)}" y2="${y(18)}" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="4 4"/><text class="annot" x="${L+pw}" y="${y(18)-5}" text-anchor="end">Repair threshold 18 dB</text>`;
+  const line=data.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)).join(' ');
+  s+=`<path d="${line} L${x(29)} ${y(ymin)} L${x(0)} ${y(ymin)} Z" fill="var(--s1-soft)"/><path d="${line}" fill="none" stroke="var(--s1)" stroke-width="2"/>`;
+  s+=`<circle cx="${x(29)}" cy="${y(data[29])}" r="4.5" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>`;
+  [0,14,29].forEach(i=>s+=`<text class="axis" x="${x(i)}" y="${H-6}" text-anchor="${i===0?'start':i===29?'end':'middle'}">${i===29?'today':'−'+(29-i)+'d'}</text>`);
+  s+=`<g id="osnrHover"></g><rect id="osnrHit" x="${L}" y="${T}" width="${pw}" height="${ph}" fill="transparent"/>`;
+  $('#osnrSvg').innerHTML=s;
+  const slope=(data[29]-data[15])/14;const days=Math.round((data[29]-18)/-slope);
+  const sw=maintPlan(applied)[0];const swd=new Date(Date.now()+sw.d*864e5);
+  $('#osnrNote').innerHTML=`Now <b class="mono">${data[29].toFixed(1)} dB</b>, falling ${(-slope).toFixed(2)} dB a day. At this rate it reaches the threshold in about <b>${days} days</b>. Swap booked for <b>${swd.toLocaleDateString('en-US',{month:'short',day:'numeric'})}, ${String(sw.h).padStart(2,'0')}:00</b>.`;
+  bindHover('#osnrSvg','#osnrHit','#osnrTip','#osnrHover',W,px=>{const i=clamp(Math.round((px-L)/pw*29),0,29);return {x:x(i),y:y(data[i]),html:`<div>${i===29?'Today':(29-i)+' days ago'}</div><div>OSNR <b>${data[i].toFixed(2)} dB</b></div>`,g:`<line x1="${x(i)}" x2="${x(i)}" y1="${T}" y2="${T+ph}" stroke="var(--muted)"/><circle cx="${x(i)}" cy="${y(data[i])}" r="4" fill="var(--s1)" stroke="var(--panel)" stroke-width="2"/>`}});
+}
+
+/* ---- controls ---- */
+function seg(id,opts,val){return `<div class="seg" role="group" id="${id}">${opts.map(([v,n])=>`<button type="button" data-v="${v}" aria-pressed="${String(v)===String(val)}">${n}</button>`).join('')}</div>`}
+function renderCtl(){
+  const c=pend;
+  $('#ctl').innerHTML=`
+  <div class="group"><div class="row"><span class="lbl">Lit fiber pairs</span><span class="hint">${capOf(c).toFixed(1)} Tbps lit</span></div>
+    <div class="row"><div class="stepper"><button type="button" data-step="pairs" data-d="-1" aria-label="Fewer fiber pairs">−</button><output id="o-pairs">${c.pairs}</output><button type="button" data-step="pairs" data-d="1" aria-label="More fiber pairs">+</button></div><span class="hint">of 8 leased · 6 h to light</span></div></div>
+  <div class="group"><div class="row"><label class="lbl" for="waves">Wavelengths per pair</label><span class="mono">${c.waves}</span></div>
+    <input type="range" id="waves" min="16" max="64" step="8" value="${c.waves}"><span class="hint">Google-owned optics. Changes are hitless.</span></div>
+  <div class="group"><span class="lbl">Optics per wavelength</span>${seg('rate',[[400,'400G'],[800,'800G']],c.rate)}</div>
+  <div class="group"><span class="lbl">Traffic priority</span>
+    <div class="mix">${CLS.map(([k,,col])=>`<div style="width:${c.cls[k]}%;background:${col}"></div>`).join('')}</div>
+    ${CLS.map(([k,n,col])=>`<div class="mixrow"><label for="cls-${k}"><i class="dot" style="background:${col}"></i>${n.split(' ')[0]==='AI'?'AI training':n.split(' ')[0]}</label><input type="range" id="cls-${k}" data-cls="${k}" min="5" max="90" value="${c.cls[k]}"><span class="v">${c.cls[k]}%</span></div>`).join('')}
+    <span class="hint">Guaranteed share of capacity during congestion</span></div>
+  <div class="group"><span class="lbl">Backup route</span>${seg('backup',Object.entries(BACKUP).map(([k,v])=>[k,v.n]),c.backup)}<span class="hint">Availability commitment ${BACKUP[c.backup].avail}%</span></div>
+  <div class="group"><div class="tog"><label class="lbl" for="autoscale">Burst auto-scale</label><span class="switch"><input type="checkbox" id="autoscale" ${c.autoscale?'checked':''}><span></span></span></div>
+    <div class="row" ${c.autoscale?'':'hidden'}><label class="hint" for="scaleAt">Light a reserve pair above</label><span class="mono">${c.scaleAt}%</span></div>
+    <input type="range" id="scaleAt" min="60" max="95" step="5" value="${c.scaleAt}" ${c.autoscale?'':'hidden'}></div>
+  <div class="group"><span class="lbl">Encryption</span>${seg('enc',Object.entries(ENC).map(([k,v])=>[k,v.n]),c.enc)}<span class="hint">${ENC[c.enc].desc}</span></div>
+  <div class="group"><span class="lbl">Support tier</span>${seg('support',Object.entries(SUPPORT).map(([k,v])=>[k,v.n.replace(' 24/7','')]),c.support)}<span class="hint">${SUPPORT[c.support].desc}</span></div>
+  <div class="group"><span class="lbl">Maintenance scheduling</span>${seg('maint',Object.entries(MAINT).map(([k,v])=>[k,v.n]),c.maint)}<span class="hint">${MAINT[c.maint].desc}</span></div>`;
+}
+$('#ctl').addEventListener('click',e=>{
+  const st=e.target.closest('[data-step]');if(st){pend.pairs=clamp(pend.pairs+(+st.dataset.d),1,8);changed();return}
+  const b=e.target.closest('.seg button');if(b){const k=b.parentElement.id;const v=b.dataset.v;pend[k]=k==='rate'?+v:v;changed()}
+});
+$('#ctl').addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='waves'){pend.waves=+t.value;changed(true)}
+  else if(t.id==='scaleAt'){pend.scaleAt=+t.value;changed(true)}
+  else if(t.id==='autoscale'){pend.autoscale=t.checked;changed()}
+  else if(t.dataset.cls){const k=t.dataset.cls;const v=+t.value;const others=CLS.map(c=>c[0]).filter(x=>x!==k);const rest=100-v;const sum=others.reduce((a,o)=>a+pend.cls[o],0)||1;
+    const n={...pend.cls,[k]:v};let acc=0;others.forEach((o,i)=>{n[o]=i===others.length-1?rest-acc:Math.max(5,Math.round(pend.cls[o]/sum*rest));acc+=n[o]});
+    if(n[others[1]]<5){n[others[1]]=5;n[others[0]]=rest-5}pend.cls=n;changed(true)}
+});
+function changed(fromSlider){confirming=false;if(fromSlider){updateCtlReadouts()}else renderCtl();renderDerived()}
+function updateCtlReadouts(){
+  const g=$('#ctl');const w=g.querySelector('#waves');w.previousElementSibling.querySelector('.mono').textContent=pend.waves;
+  g.querySelector('.group .hint').textContent=capOf(pend).toFixed(1)+' Tbps lit';
+  const sa=g.querySelector('#scaleAt');sa.previousElementSibling.querySelector('.mono').textContent=pend.scaleAt+'%';
+  const mix=g.querySelector('.mix').children;CLS.forEach(([k],i)=>{mix[i].style.width=pend.cls[k]+'%';const r=g.querySelector('#cls-'+k);r.value=pend.cls[k];r.nextElementSibling.textContent=pend.cls[k]+'%'});
+}
+
+/* ---- staged changes ---- */
+const LABELS={pairs:['Lit fiber pairs',v=>v,'Hitless · new pair lit in about 6 h'],waves:['Wavelengths per pair',v=>v,'Hitless · about 30 min'],rate:['Optics per wavelength',v=>v+'G','Rolling optic swap over 2 nights'],backup:['Backup route',v=>BACKUP[v].n,'About 1 h, no traffic impact'],enc:['Encryption',v=>ENC[v].n,'Key rotation, about 15 min'],autoscale:['Burst auto-scale',v=>v?'On':'Off','Immediate'],scaleAt:['Burst trigger',v=>v+'%','Immediate'],support:['Support tier',v=>SUPPORT[v].n,'Starts next billing cycle'],maint:['Maintenance scheduling',v=>MAINT[v].n,'Applies to upcoming windows'],cls:['Traffic priority',v=>`${v.training}/${v.inference}/${v.replication}`,'Immediate · training/inference/replication']};
+function diffs(){return Object.keys(LABELS).filter(k=>JSON.stringify(applied[k])!==JSON.stringify(pend[k])).filter(k=>!(k==='scaleAt'&&!pend.autoscale&&!applied.autoscale))}
+function isDirty(){return diffs().length>0}
+function renderPend(){
+  const ds=diffs();$('#pendCard').classList.toggle('clean',!ds.length);
+  $('#pendCount').textContent=ds.length?`${ds.length} change${ds.length>1?'s':''}`:'';
+  if(!ds.length){$('#pendBody').innerHTML='<p class="empty">No changes staged. Adjust a setting or stage a recommendation to see its cost and effect here.</p>';return}
+  const a=econ(applied).total,p=econ(pend).total,d=p-a;
+  const fa=fit(applied),fp=fit(pend);
+  const warn=pend.backup==='none'?'<p style="margin:0;font-size:12.5px;color:var(--crit-ink)">With no backup route, a fiber cut or maintenance window stops traffic.</p>':'';
+  $('#pendBody').innerHTML=`<ul class="diff">${ds.map(k=>{const [n,f,eta]=LABELS[k];return `<li><span>${n}</span><span><span class="from">${f(applied[k])}</span> → <span class="to">${f(pend[k])}</span></span><span class="eta">${eta}</span></li>`}).join('')}</ul>
+   <div class="delta"><span><span class="lbl">Monthly cost</span><br><span class="mono" style="font-size:12px;color:var(--ink-2)">${fmt$(a)} → ${fmt$(p)}</span></span><strong class="${d>0?'up':d<0?'down':''}">${d>=0?'+':'−'}${fmt$(Math.abs(d))}</strong></div>
+   <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-2)">Fit to priorities ${fa} → <b>${fp}</b> · Capacity ${capOf(applied).toFixed(1)} → <b>${capOf(pend).toFixed(1)} Tbps</b></p>${warn}
+   ${confirming?`<div class="confirm"><span>Apply ${ds.length} change${ds.length>1?'s':''} to the live network? Verizon's NOC is notified and changes roll out as listed above.</span><div class="btns"><button class="btn primary" id="doApply">Confirm and apply</button><button class="btn" id="noApply">Back</button></div></div>`
+     :`<div class="btns" style="margin-top:10px"><button class="btn primary" id="review">Review and apply</button><button class="btn" id="discard">Discard</button></div>`}`;
+}
+$('#pendBody').addEventListener('click',e=>{
+  if(e.target.id==='review'){confirming=true;renderPend()}
+  else if(e.target.id==='noApply'){confirming=false;renderPend()}
+  else if(e.target.id==='discard'){pend=structuredClone(applied);confirming=false;renderCtl();renderDerived();toast('Staged changes discarded')}
+  else if(e.target.id==='doApply'){
+    const ds=diffs();const d=econ(pend).total-econ(applied).total;
+    const what=ds.map(k=>{const [n,f]=LABELS[k];return `${n} ${f(applied[k])} → ${f(pend[k])}`}).join('; ');
+    log.unshift({t:new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}),who:'Google NetOps (you)',what,d});log=log.slice(0,12);
+    applied=structuredClone(pend);confirming=false;save('aic.cfg',applied);try{localStorage.setItem('aic.log',JSON.stringify(log))}catch(err){}
+    renderCtl();renderAll();toast(`Applied ${ds.length} change${ds.length>1?'s':''}`);
+  }
+});
+function renderLog(){
+  $('#log').innerHTML=log.map(l=>`<li><time>${l.t} · ${l.who}</time><span>${l.what}</span><span class="mono ${l.d>0?'up':l.d<0?'down':''}" style="font-size:12px">${l.d?(l.d>0?'+':'−')+fmtK(Math.abs(l.d)):'—'}</span></li>`).join('')+
+   `<li><span></span><button class="btn" id="resetDemo" style="font-size:12px;padding:5px 10px">Reset demo</button></li>`;
+}
+$('#log').addEventListener('click',e=>{if(e.target.id!=='resetDemo')return;try{['aic.cfg','aic.pri','aic.log'].forEach(k=>localStorage.removeItem(k))}catch(err){}location.reload()});
+
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2400)}
+
+function renderDerived(){renderFit();renderPend();renderRecs();renderCosts();renderForecast();renderKpis()}
+function renderAll(){renderPri();renderDerived();renderRoute();renderMaint();renderOsnr();renderLog();renderLive();renderFeed()}
+
+// warm up history so the chart opens with two minutes of data
+(function(){const t0=Date.now();for(let i=59;i>=0;i--){sample();hist[hist.length-1].t=new Date(t0-i*2000)}})();
+renderCtl();renderAll();
+function tick(){sample();renderLive();renderKpis();$('#clock').textContent='Live · '+new Date().toLocaleTimeString('en-US',{hour12:false})}
+tick();setInterval(tick,2000);
+})();
+</script>
+
+</body>
+</html>
