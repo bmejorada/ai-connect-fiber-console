@@ -131,6 +131,16 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .note{margin:8px 0 0;font-size:12.5px;color:var(--ink-2)}
 
 /* block map */
+.score5{display:grid;grid-template-columns:minmax(0,1.35fr) repeat(5,minmax(0,1fr));gap:10px}
+.ns{background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ns .lbl{color:var(--accent-ink);opacity:.85}
+.ns b{font-family:var(--display);font-size:34px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
+.ns span{font-size:12px;opacity:.9}
+.sm{background:var(--sunken);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.sm b{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sm .t{font-size:11.5px;color:var(--muted)}
+@media (max-width:1180px){.score5{grid-template-columns:repeat(3,minmax(0,1fr))}.ns{grid-column:1/-1}}
+@media (max-width:520px){.score5{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .blockwrap{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px;align-items:start}
 .map .bk{fill:var(--block);stroke:var(--line)}
 .map .st{fill:var(--street)}
@@ -309,7 +319,17 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   .prio{grid-template-columns:minmax(0,1fr) auto}
   .prio .sliders{grid-column:1/-1;grid-row:2}
 }
-@media (max-width:860px){.blockwrap{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){.score5{display:grid;grid-template-columns:minmax(0,1.35fr) repeat(5,minmax(0,1fr));gap:10px}
+.ns{background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ns .lbl{color:var(--accent-ink);opacity:.85}
+.ns b{font-family:var(--display);font-size:34px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
+.ns span{font-size:12px;opacity:.9}
+.sm{background:var(--sunken);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.sm b{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sm .t{font-size:11.5px;color:var(--muted)}
+@media (max-width:1180px){.score5{grid-template-columns:repeat(3,minmax(0,1fr))}.ns{grid-column:1/-1}}
+@media (max-width:520px){.score5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.blockwrap{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:760px){
   .rail{grid-template-columns:minmax(0,1fr)}
   .two,.vaults,.detail{grid-template-columns:minmax(0,1fr)}
@@ -339,7 +359,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
       <div class="field">
         <label for="siteSel">Edge site</label>
         <select id="siteSel">
-          <option value="co07">CO-07 Midtown exchange · Live</option>
+          <option value="co07">CO-07 Chicago pilot · Live</option>
           <option disabled>CO-12 Riverside exchange · Peer site, 2028</option>
           <option disabled>Ten-site metro ring · 2029</option>
           <option disabled>Coast-to-coast AI connector · 2030</option>
@@ -376,6 +396,10 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 
       <!-- OVERVIEW -->
       <div class="view" id="view-overview" role="tabpanel" aria-labelledby="tab-overview">
+        <section class="card" id="pilotCard">
+          <div class="card-h"><div><h2>Pilot scorecard</h2><p>How we'll know it's working: the Chicago pilot's success metrics, measured live.</p></div><span class="pill good" id="pilotPill">On track</span></div>
+          <div class="score5" id="pilot"></div>
+        </section>
         <section class="card">
           <div class="card-h">
             <div><h2>CO-07 city block</h2><p>The converted central office sits in the middle. Fiber under the streets connects it to the customers around it, to Google's cloud region and to a peer edge site.</p></div>
@@ -718,7 +742,7 @@ function renderLive(){
 
 /* ---------- block map + trace ---------- */
 const ROUTES={
-  hospital:{name:'Hospital imaging AI',svc:'Customer-lit dark fiber pair',col:'var(--tenant)',vault:'East',m:480,base:18.4,sla:25,gbps:38,
+  hospital:{name:'Hospital imaging AI',svc:'Customer-lit dark fiber pair',col:'var(--tenant)',vault:'East',m:643,base:18.4,sla:25,gbps:38,
     pts:[[560,140],[560,155],[450,155],[450,222],[400,222]],node:[560,92],
     steps:['Scanner sends the image over the hospital\'s own dark fiber pair','Splice at Manhole M1 joins the street duct bank','Enters through the east cable vault','Cross-connect in the meet-me room','GPU hall runs the model and returns the result'],
     note:'The model\'s compute time dominates. Fiber adds about 2 µs each way.'},
@@ -738,9 +762,9 @@ const ROUTES={
     pts:[[400,232],[450,232],[450,295],[662,295]],node:[662,295],
     steps:['GPUs send model updates and logs','Optical core puts them on DWDM wavelengths','Leaves through the east vault','About 40 km of long-haul fiber to Google\'s cloud region'],
     note:'Bulk data travels farther. Time-sensitive requests stay on the block.'},
-  peer:{name:'Peer edge site CO-12',svc:'Verizon lit 400G',col:'var(--lit)',vault:'West',m:6000,base:.06,sla:1,gbps:0,
+  peer:{name:'Peer edge site CO-12',svc:'Verizon lit 400G',col:'var(--lit)',vault:'West',m:3000,base:.03,sla:1,gbps:0,
     pts:[[280,250],[230,250],[230,432]],node:[230,432],
-    steps:['Optical core sends failover or shared work','Leaves through the west vault','6 km across town to CO-12'],
+    steps:['Optical core sends failover or shared work','Leaves through the west vault','3 km across town to CO-12'],
     note:'Lets traffic fail over between sites and share work.'}};
 const ROUTE_ORDER=['hospital','depot','cell','office','cloud','peer'];
 let traceKey='hospital';
@@ -773,7 +797,7 @@ function renderMap(){
   // manholes
   [['M1',470,155],['M2',450,262],['M3',230,275],['M4',180,155]].forEach(([n,x,y])=>s+=`<g><title>Manhole ${n}</title><circle cx="${x}" cy="${y}" r="6" fill="var(--panel)" stroke="${n==='M3'?'var(--serious)':'var(--ink-2)'}" stroke-width="2"/></g><text class="axis" x="${x+9}" y="${y-6}">${n}</text>`);
   // off-map labels
-  s+=`<text class="bsub" x="672" y="285" text-anchor="end">Cloud region · 40 km →</text><text class="bsub" x="238" y="430">↓ Peer site CO-12 · 6 km</text>`;
+  s+=`<text class="bsub" x="672" y="285" text-anchor="end">Cloud region · 40 km →</text><text class="bsub" x="238" y="430">↓ Peer site CO-12 · 3 km</text>`;
   // latency badges
   ['hospital','depot','cell','office'].forEach(k=>{const [x,y]=ROUTES[k].node;const t=liveLat(k).toFixed(1)+' ms';const w=t.length*6.6+12;const bx=k==='cell'?x-w-10:x-w/2,by=k==='cell'?y-9:y+(k==='depot'?14:-2);
     s+=`<g class="lat" data-k="${k}"><rect class="badge" x="${bx}" y="${by}" width="${w}" height="18" rx="9"/><text class="btxt" x="${bx+w/2}" y="${by+12.5}" text-anchor="middle">${t}</text></g>`});
@@ -1108,15 +1132,29 @@ let currentTab=(()=>{const h=(location.hash||'').slice(1);if(TABS.includes(h))re
 function showTab(t){currentTab=t;TABS.forEach(k=>{$('#view-'+k).hidden=k!==t;const b=$('#tab-'+k);b.setAttribute('aria-selected',k===t);b.tabIndex=k===t?0:-1});try{localStorage.setItem('aic2.tab',t)}catch(e){}renderTab()}
 $('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)showTab(b.dataset.tab)});
 $('.tabs').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;const i=TABS.indexOf(currentTab);const n=TABS[(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length];showTab(n);$('#tab-'+n).focus()});
+function renderPilot(){
+  const last=hist[hist.length-1]||{lat:7};
+  const occMW=capMW(applied)+OTHER_RACKS*30/1000;const racksSold=applied.racks+OTHER_RACKS;
+  const rev=econ(applied).total+OTHER_RACKS*5200;
+  const within=['hospital','depot','cell','office'].filter(k=>liveLat(k)<=ROUTES[k].sla).length;
+  const tile=(l,v,t)=>`<div class="sm"><span class="lbl">${l}</span><b>${v}</b><span class="t">${t}</span></div>`;
+  $('#pilot').innerHTML=`<div class="ns"><span class="lbl">North Star · Occupied megawatts</span><b>${occMW.toFixed(2)} MW</b><span>${Math.round(occMW/SITE_MW*100)}% of ${SITE_MW} MW at CO-07 · Google ${capMW(applied).toFixed(2)} MW</span></div>`+
+    tile('Sites converted','1','Chicago pilot live')+
+    tile('Occupancy rate',Math.round(racksSold/RACKS_TOTAL*100)+'%',`${racksSold} of ${RACKS_TOTAL} racks sold`)+
+    tile('Revenue per site',fmtK(rev),'per month, all tenants')+
+    tile('Time-to-connect','3.5 h','median, order to live cross-connect')+
+    tile('Latency achieved',within+' of 4',`routes within SLA · p50 ${last.lat.toFixed(1)} ms`);
+  $('#pilotPill').className='pill '+(within===4?'good':'warn');$('#pilotPill').textContent=within===4?'On track':'Watch latency';
+}
 function renderTab(){
-  if(currentTab==='overview'){renderMap();renderTracePanel();renderLive();renderForecast();renderRecs();renderFeed()}
+  if(currentTab==='overview'){renderPilot();renderMap();renderTracePanel();renderLive();renderForecast();renderRecs();renderFeed()}
   else if(currentTab==='underground')renderUnderground();
   else if(currentTab==='inside'){renderInside();renderMaint()}
   else if(currentTab==='outside')renderOutside();
   else if(currentTab==='costs')renderCosts();
 }
 function renderDerived(){renderFit();renderPend();renderKpis();
-  if(currentTab==='overview'){renderRecs();renderForecast()}
+  if(currentTab==='overview'){renderPilot();renderRecs();renderForecast()}
   else if(currentTab==='underground')renderUnderground();
   else if(currentTab==='inside')renderInside();
   else if(currentTab==='costs')renderCosts();
@@ -1127,7 +1165,7 @@ function renderAll(){renderPri();renderDerived();renderLog();renderTab()}
 renderCtl();renderPri();renderFit();renderPend();renderKpis();renderLog();showTab(currentTab);
 let tick=0;
 setInterval(()=>{sample();tick++;renderKpis();$('#clock').textContent='Live · '+new Date().toLocaleTimeString('en-US',{hour12:false});
-  if(currentTab==='overview'){renderLive();updateBadges()}
+  if(currentTab==='overview'){renderLive();updateBadges();renderPilot()}
   else if(currentTab==='inside'&&tick%2===0)renderInside();
   else if(currentTab==='outside'&&tick%2===0)renderOutside();
 },2000);
