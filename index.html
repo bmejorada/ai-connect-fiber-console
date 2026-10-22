@@ -14,7 +14,7 @@
 :root{
   --bg:#eef2f6; --panel:#ffffff; --sunken:#f5f7fa; --ink:#0e1726; --ink-2:#465266; --muted:#748096; --line:#dbe2ea; --street:#e3e8ee; --block:#f7f9fb;
   --accent:#0d7480; --accent-ink:#ffffff; --accent-soft:#e1f1f2;
-  --google:#2a78d6; --google-soft:rgba(42,120,214,.16); --tenant:#eb6834; --lit:#1baf7a; --dark:#b9c3cf; --copper:#a5775a;
+  --google:#2a78d6; --google-soft:rgba(42,120,214,.16); --tenant:#eb6834; --lit:#1baf7a; --dark:#b9c3cf; --copper:#a5775a; --heat:#d9581f; --cool:#2f7fc4;
   --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
   --good-ink:#0a7a0a; --warn-ink:#8a5d00; --serious-ink:#b2491f; --crit-ink:#b02a2a;
   --seq0:#eef3fa; --seq1:#cde2fb; --seq2:#86b6ef; --seq3:#3987e5; --seq4:#1c5cab; --seq5:#0d366b;
@@ -26,14 +26,14 @@
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042; --street:#1a2431; --block:#141d29;
   --accent:#3fb7c1; --accent-ink:#06191b; --accent-soft:#12303a;
-  --google:#3987e5; --google-soft:rgba(57,135,229,.22); --tenant:#d95926; --lit:#199e70; --dark:#4a5768; --copper:#b98a6c;
+  --google:#3987e5; --google-soft:rgba(57,135,229,.22); --tenant:#d95926; --lit:#199e70; --dark:#4a5768; --copper:#b98a6c; --heat:#ff8a4c; --cool:#6fb1ff;
   --good-ink:#4fd04f; --warn-ink:#fab219; --serious-ink:#f09a76; --crit-ink:#f07070;
   --seq0:#152131; --seq1:#184f95; --seq2:#256abf; --seq3:#3987e5; --seq4:#86b6ef; --seq5:#cde2fb;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0b1017; --panel:#121a25; --sunken:#0f161f; --ink:#e7edf5; --ink-2:#aab5c5; --muted:#7c889b; --line:#223042; --street:#1a2431; --block:#141d29;
   --accent:#3fb7c1; --accent-ink:#06191b; --accent-soft:#12303a;
-  --google:#3987e5; --google-soft:rgba(57,135,229,.22); --tenant:#d95926; --lit:#199e70; --dark:#4a5768; --copper:#b98a6c;
+  --google:#3987e5; --google-soft:rgba(57,135,229,.22); --tenant:#d95926; --lit:#199e70; --dark:#4a5768; --copper:#b98a6c; --heat:#ff8a4c; --cool:#6fb1ff;
   --good-ink:#4fd04f; --warn-ink:#fab219; --serious-ink:#f09a76; --crit-ink:#f07070;
   --seq0:#152131; --seq1:#184f95; --seq2:#256abf; --seq3:#3987e5; --seq4:#86b6ef; --seq5:#cde2fb;
   color-scheme:dark}
@@ -155,6 +155,14 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .map .route.hit{stroke:transparent;stroke-width:16}
 .map.dim .route.vis:not(.on){opacity:.18}
 .map .vault{fill:var(--panel);stroke:var(--ink);stroke-width:1.5}
+.map .pipe{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.map .pipe.sup{stroke:var(--heat)} .map .pipe.ret{stroke:var(--cool);stroke-dasharray:4 3}
+.map.summer .pipe{opacity:.4}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin-top:12px}
+.flow .st{background:var(--sunken);border-radius:8px;padding:8px 10px;min-width:0;flex:1 1 120px}
+.flow .st b{display:block;font-family:var(--mono);font-weight:500;font-size:14px}
+.flow .st span{font-size:11.5px;color:var(--muted)}
+.flow .ar{align-self:center;color:var(--muted)}
 .map .pole{fill:var(--lit);stroke:var(--panel);stroke-width:2}
 .map .badge{fill:var(--panel);stroke:var(--line)}
 .map .btxt{fill:var(--ink);font:500 10.5px var(--mono)}
@@ -403,15 +411,15 @@ input[type=range]{width:100%;accent-color:var(--accent)}
         <section class="card">
           <div class="card-h">
             <div><h2>CO-07 city block</h2><p>The converted central office sits in the middle. Fiber under the streets connects it to the customers around it, to Google's cloud region and to a peer edge site.</p></div>
-            <div class="legend"><span><i class="sw" style="background:var(--google)"></i>Google dark fiber</span><span><i class="sw" style="background:var(--tenant)"></i>Customer-lit dark fiber</span><span><i class="sw" style="background:var(--lit)"></i>Verizon lit fiber</span><span><i class="sw" style="background:var(--dark);height:6px"></i>Duct bank</span></div>
+            <div class="legend"><span><i class="sw" style="background:var(--google)"></i>Google dark fiber</span><span><i class="sw" style="background:var(--tenant)"></i>Customer-lit dark fiber</span><span><i class="sw" style="background:var(--lit)"></i>Verizon lit fiber</span><span><i class="sw" style="background:var(--dark);height:6px"></i>Duct bank</span><span><i class="sw" style="background:var(--heat)"></i>Heat loop supply ≈70 °C</span><span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--cool) 0 4px,transparent 4px 6px)"></i>Return ≈35 °C</span></div>
           </div>
           <div class="blockwrap">
             <div class="chartbox scrollx"><svg id="mapSvg" class="map" viewBox="0 0 680 440" role="img" aria-label="Top-down map of the CO-07 city block" style="min-width:520px"></svg></div>
             <div class="trace">
               <div class="field"><label for="traceSel">Trace a request from</label><select id="traceSel"></select></div>
               <div class="ctr">
-                <div class="mini"><span class="lbl">Fiber traveled</span><b id="trM">0 m</b></div>
-                <div class="mini"><span class="lbl">Light, one way</span><b id="trUs">0.0 µs</b></div>
+                <div class="mini"><span class="lbl" id="trML">Fiber traveled</span><b id="trM">0 m</b></div>
+                <div class="mini"><span class="lbl" id="trUL">Light, one way</span><b id="trUs">0.0 µs</b></div>
               </div>
               <ol class="steps" id="trSteps"></ol>
               <p class="note" id="trNote" style="margin:0"></p>
@@ -451,6 +459,9 @@ input[type=range]{width:100%;accent-color:var(--accent)}
         <section class="card">
           <div class="card-h"><div><h2>Two ways into the building</h2><p>Fiber enters CO-07 through cable vaults on different streets, so one cut can't isolate the site.</p></div><span id="entryPill"></span></div>
           <div class="vaults" id="vaults"></div>
+          <h3 style="margin:16px 0 8px">Neighborhood heat loop</h3>
+          <p class="note" style="margin:0">Insulated supply and return pipes run about 1 m under the sidewalks, shallower than the fiber at about 1.5 m. Building water never touches the racks.</p>
+          <div class="flow" id="ugFlow"></div>
           <h3 style="margin:16px 0 8px">Manholes and splice points</h3>
           <ul class="mh" id="manholes"></ul>
         </section>
@@ -489,7 +500,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
       <div class="view" id="view-inside" role="tabpanel" aria-labelledby="tab-inside" hidden>
         <section class="card">
           <div class="card-h">
-            <div><h2>Floors of CO-07</h2><p>Kept: utility feeds, generators, hardened structure, conduit entrances. Removed: copper frames and switching gear. Added: GPU halls, liquid cooling, meet-me room, optical core.</p></div>
+            <div><h2>Floors of CO-07</h2><p>Kept: utility feeds, generators, hardened structure, conduit entrances. Removed: copper frames and switching gear. Added: GPU halls, liquid cooling, meet-me room, optical core, heat recovery plant.</p></div>
             <div class="legend"><span><i class="sq" style="background:var(--google)"></i>Google rack</span><span><i class="sq" style="background:var(--google-soft);box-shadow:inset 0 0 0 1.5px var(--google)"></i>Burst rack</span><span><i class="sq" style="background:var(--tenant)"></i>Other tenant</span><span><i class="sq" style="background:var(--sunken);box-shadow:inset 0 0 0 1px var(--line)"></i>Open</span></div>
           </div>
           <div class="scrollx"><div class="floors" id="floors"></div></div>
@@ -515,9 +526,12 @@ input[type=range]{width:100%;accent-color:var(--accent)}
         <section class="card">
           <div class="card-h"><div><h2>Sustainability scorecard</h2><p>Published monthly for this site: energy efficiency, renewable share, water use and heat reused.</p></div><span class="pill good">Published Oct 1</span></div>
           <div class="score" id="score"></div>
-          <h3 style="margin:16px 0 0">Where the heat goes</h3>
+          <div class="card-h" style="margin:16px 0 0;align-items:center"><div><h3>Waste heat, put to work</h3><p>Nearly all the electricity the GPUs use becomes heat. The site pipes it to its neighbors as hot water instead of venting it from the roof.</p></div>
+            <div class="seg" id="seasonSeg" role="group" aria-label="Season" style="width:190px"><button type="button" data-s="winter">Winter</button><button type="button" data-s="summer">Summer</button></div></div>
+          <div class="flow" id="heatflow"></div>
           <div class="heatdest" id="heatdest"></div>
           <p class="note" id="heatNote"></p>
+          <p class="note" style="font-size:11.5px;color:var(--muted)">Already in use elsewhere: Meta's data center in Odense, Denmark, helps heat about 11,000 homes, and Microsoft and Fortum are building data centers to heat homes around Helsinki.</p>
         </section>
       </div>
 
@@ -587,7 +601,7 @@ let pend=structuredClone(applied);
 let pri=load('aic2.pri',PRESETS[0][2]);
 let log=(()=>{try{return JSON.parse(localStorage.getItem('aic2.log'))||null}catch(e){return null}})()||[
   {t:'Oct 17, 10:05',who:'Google NetOps',what:'Reserved racks 60 → 72 in GPU halls 3–5',d:21400},
-  {t:'Oct 12, 16:40',who:'Verizon site team',what:'Heat reuse loop connected to 5th Ave apartments',d:-6900},
+  {t:'Oct 12, 16:40',who:'Verizon site team',what:'Heat loop connected to the apartments and school across Elm St',d:-6900},
   {t:'Oct 1, 08:00',who:'Verizon',what:'CO-07 accepted into service as an edge AI site',d:0}];
 let confirming=false;
 
@@ -605,11 +619,14 @@ function predLoad(dayIdx,h,cfg){const dow=(new Date(Date.now()+dayIdx*864e5)).ge
 function forecast(){const out=[];const d=new Date();for(let i=1;i<=12;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,1);out.push({label:m.toLocaleString('en-US',{month:'short'}),y:m.getFullYear(),peak:BASE_PEAK*Math.pow(1.05,i)})}return out}
 
 /* ---------- economics ---------- */
+let season=(()=>{try{const v=localStorage.getItem('aic2.season');if(v==='winter'||v==='summer')return v}catch(e){}const m=new Date().getMonth();return (m>=9||m<=3)?'winter':'summer'})();
+const LOOP={winter:{loop:.85,split:[['Hospital','Space heat and hot water for patient rooms',.40],['Office tower','Space heat',.20],['Apartments & school','Across Elm St, replacing gas boilers',.40]]},
+  summer:{loop:.22,split:[['Hospital','Hot water',.50],['Office tower','Hot water',.15],['Apartments & school','Hot water',.35]]}};
 function econ(c){
   const itKW=c.racks*kwOf(c)*.72;
   const kwh=itKW*730*HEAT[c.heat].pue;
   const energy=kwh*.105*(c.gridShift?.95:1);
-  const heatMWh=c.heat==='reuse'?itKW*730*.55/1000:0;
+  const heatMWh=c.heat==='reuse'?itKW*730*LOOP[season].loop/1000:0;
   const lines=[
     ['Rack space and cooling ('+c.racks+' racks)',c.racks*1500],
     ['GPU power ('+MODE[c.mode].n.toLowerCase()+' mode)',energy],
@@ -683,7 +700,8 @@ let feedItems=[
   {t:'07:52',k:'serious',s:'Predicted',title:'Splice loss rising at Manhole M3',body:'West path splice is up 0.23 dB in 30 days. A re-splice is booked in a low-load window.'},
   {t:'Yesterday',k:'good',s:'Done',title:'Hospital pair lit by customer optics',body:'The hospital installed its own optics on strands 2-1 and 2-2. Verizon maintains the glass.'},
   {t:'Oct 15',k:'warn',s:'Notice',title:'Copper pull in conduit 3',body:'120 more copper pairs removed. No customer traffic in that conduit.'},
-  {t:'Oct 1',k:'good',s:'Report',title:'Sustainability scorecard published',body:'PUE 1.24, 72% renewable, 0.05 L of water per kWh.'}];
+  {t:'Oct 1',k:'good',s:'Report',title:'Sustainability scorecard published',body:'PUE 1.24, 72% renewable, 0.05 L of water per kWh.'},
+  {t:'Sep 28',k:'good',s:'Done',title:'Heat loop switched to winter mode',body:'Most rack heat now goes to the hospital, office tower, apartments and school. Rooftop coolers are mostly idle.'}];
 function pushFeed(k,title,body){const t=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});feedItems.unshift({t,k,s:{good:'Resolved',warn:'Live',serious:'Watch',crit:'Critical'}[k],title,body});feedItems=feedItems.slice(0,6);renderFeed()}
 function renderFeed(){$('#feed').innerHTML=feedItems.map(f=>`<li><time>${f.t}</time><div><span class="pill ${f.k}">${f.s}</span><div><b>${f.title}</b></div><div style="color:var(--ink-2)">${f.body}</div></div></li>`).join('')}
 function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x)));const n=x/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
@@ -767,6 +785,11 @@ const ROUTES={
     steps:['Optical core sends failover or shared work','Leaves through the west vault','3 km across town to CO-12'],
     note:'Lets traffic fail over between sites and share work.'}};
 const ROUTE_ORDER=['hospital','depot','cell','office','cloud','peer'];
+ROUTES.heat={name:'Heat to the hospital',svc:'Neighborhood heat loop',col:'var(--heat)',vault:'Basement heat plant',m:290,temps:[55,55,70,68,35],
+  pts:[[372,262],[436,262],[436,145],[545,145],[545,131]],node:[545,131],
+  steps:['Cold plates on the GPUs pick up heat. Water leaves the racks at about 55 °C','A heat exchanger in the basement plant passes it to a separate building loop','A heat pump raises the water to about 70 °C','Insulated pipe carries it under the sidewalk to the hospital','Radiators and hot-water tanks use it, and it returns at about 35 °C'],
+  note:'The same heat that would have gone out the roof now warms patient rooms next door.'};
+const TRACE_ORDER=[...ROUTE_ORDER,'heat'];
 let traceKey='hospital';
 const pathD=pts=>pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
 function liveLat(k){const r=ROUTES[k];if(k==='cloud'||k==='peer')return r.base;return r.base+(MODE[applied.mode].lat-7.0)+(hist.length?Math.max(0,hist[hist.length-1].lat-MODE[applied.mode].lat):0)}
@@ -775,7 +798,7 @@ function renderMap(){
   let s=`<rect x="0" y="0" width="680" height="440" fill="var(--street)" rx="8"/>`;
   blocks.forEach(([x,y])=>s+=`<rect class="bk" x="${x}" y="${y}" width="180" height="110" rx="6"/>`);
   // filler buildings
-  [[270,45,60,40],[345,45,60,30],[490,190,70,45],[575,195,50,60],[270,325,70,40],[355,330,55,50],[490,330,60,50],[565,325,70,35],[50,190,60,70],[125,195,60,50]].forEach(([x,y,w,h])=>s+=`<rect class="filler" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>`);
+  [[270,45,60,40],[345,45,60,30],[490,190,70,45],[575,195,50,60],[490,330,60,50],[565,325,70,35],[50,190,60,70],[125,195,60,50]].forEach(([x,y,w,h])=>s+=`<rect class="filler" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/>`);
   // street names
   s+=`<text class="stname" x="232" y="20" transform="rotate(90 232 20)">5th Ave</text><text class="stname" x="452" y="318" transform="rotate(90 452 318)">Main St</text><text class="stname" x="40" y="160">Pine St</text><text class="stname" x="40" y="300">Elm St</text>`;
   // duct bank
@@ -784,10 +807,18 @@ function renderMap(){
   s+=`<rect class="bld" x="500" y="45" width="120" height="85" rx="4"/><text class="blbl" x="512" y="66">Hospital</text><text class="bsub" x="512" y="82">Imaging AI</text>`;
   s+=`<rect class="bld" x="70" y="40" width="90" height="90" rx="4"/><text class="blbl" x="80" y="61">Office tower</text><text class="bsub" x="80" y="77">Enterprise AI</text>`;
   s+=`<rect class="bld" x="45" y="325" width="140" height="70" rx="4"/><text class="blbl" x="57" y="346">Logistics depot</text><text class="bsub" x="57" y="362">Robots and AVs</text>`;
+  s+=`<rect class="bld" x="265" y="325" width="150" height="70" rx="4"/><text class="blbl" x="277" y="346">Apartments & school</text><text class="bsub" x="277" y="362">Heat from the loop</text>`;
+  // heat loop pipes
+  if(applied.heat==='reuse'){
+    const pp=(pts,cls)=>s+=`<path class="pipe ${cls}" d="${pathD(pts)}"/>`;
+    pp([[372,267],[441,267],[441,150],[550,150],[550,131]],'ret');
+    pp([[308,262],[244,262],[244,145],[115,145],[115,131]],'sup');pp([[308,267],[239,267],[239,150],[120,150],[120,131]],'ret');
+    pp([[330,266],[330,325]],'sup');pp([[350,266],[350,325]],'ret');
+  }
   // central office
   s+=`<rect class="co" x="280" y="185" width="120" height="80" rx="4"/><text class="blbl" x="340" y="206" text-anchor="middle">CO-07</text><text class="bsub" x="340" y="221" text-anchor="middle">Edge AI site</text><text class="bsub" x="340" y="235" text-anchor="middle">Ex-copper exchange</text>`;
   // routes
-  ROUTE_ORDER.forEach(k=>{const r=ROUTES[k];const dash=(k==='peer'&&applied.peer==='standby')?'stroke-dasharray="7 6"':(k==='peer'&&applied.peer==='off')?'stroke-dasharray="2 7" opacity=".5"':'';
+  TRACE_ORDER.filter(k=>k!=='heat'||applied.heat==='reuse').forEach(k=>{const r=ROUTES[k];const dash=(k==='peer'&&applied.peer==='standby')?'stroke-dasharray="7 6"':(k==='peer'&&applied.peer==='off')?'stroke-dasharray="2 7" opacity=".5"':'';
     s+=`<path class="route vis${k===traceKey?' on':''}" data-r="${k}" d="${pathD(r.pts)}" stroke="${r.col}" ${dash}/><path class="route hit" data-r="${k}" d="${pathD(r.pts)}"><title>${r.name}</title></path>`});
   // vaults
   s+=`<g><title>East cable vault, Main St</title><rect class="vault" x="394" y="214" width="12" height="26" rx="2"/></g><text class="bsub" x="404" y="277" text-anchor="end">East vault</text>`;
@@ -803,15 +834,17 @@ function renderMap(){
     s+=`<g class="lat" data-k="${k}"><rect class="badge" x="${bx}" y="${by}" width="${w}" height="18" rx="9"/><text class="btxt" x="${bx+w/2}" y="${by+12.5}" text-anchor="middle">${t}</text></g>`});
   s+=`<circle id="photon" r="5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2" style="display:none"/>`;
   $('#mapSvg').innerHTML=s;
-  $('#mapSvg').classList.toggle('dim',!!traceKey);
+  $('#mapSvg').classList.toggle('dim',!!traceKey);$('#mapSvg').classList.toggle('summer',season==='summer');
 }
 function updateBadges(){$$('#mapSvg .lat').forEach(g=>{g.querySelector('text').textContent=liveLat(g.dataset.k).toFixed(1)+' ms'})}
 function renderTracePanel(){
   const r=ROUTES[traceKey];
-  $('#traceSel').innerHTML=ROUTE_ORDER.map(k=>`<option value="${k}" ${k===traceKey?'selected':''}>${ROUTES[k].name}</option>`).join('');
+  $('#traceSel').innerHTML=TRACE_ORDER.filter(k=>k!=='heat'||applied.heat==='reuse').map(k=>`<option value="${k}" ${k===traceKey?'selected':''}>${ROUTES[k].name}</option>`).join('');
   $('#trSteps').innerHTML=r.steps.map(s=>`<li>${s}</li>`).join('');
-  $('#trNote').textContent=r.svc+' · '+r.vault+' vault. '+r.note;
-  $('#trM').textContent='0 m';$('#trUs').textContent='0.0 µs';
+  $('#trNote').textContent=r.temps?r.svc+'. '+r.note:r.svc+' · '+r.vault+' vault. '+r.note;
+  $('#trML').textContent=r.temps?'Pipe traveled':'Fiber traveled';$('#trUL').textContent=r.temps?'Water temperature':'Light, one way';
+  $('#trM').textContent='0 m';$('#trUs').textContent=r.temps?r.temps[0]+' °C':'0.0 µs';
+  $('#trGo').textContent=r.temps?'Follow the heat':'Send a request';
 }
 function selectTrace(k){traceKey=k;$$('#mapSvg .route.vis').forEach(p=>p.classList.toggle('on',p.dataset.r===k));$('#mapSvg').classList.add('dim');renderTracePanel()}
 $('#mapSvg').addEventListener('click',e=>{const p=e.target.closest('[data-r]');if(p)selectTrace(p.dataset.r)});
@@ -823,7 +856,7 @@ $('#trGo').addEventListener('click',()=>{
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;const dur=reduce?1:1600;const t0=performance.now();
   cancelAnimationFrame(anim);dot.style.display='block';
   const fr=now=>{const f=Math.min(1,(now-t0)/dur);const pt=path.getPointAtLength(len*f);dot.setAttribute('cx',pt.x);dot.setAttribute('cy',pt.y);
-    const m=r.m*f;$('#trM').textContent=(m>=1000?(m/1000).toFixed(1)+' km':Math.round(m)+' m');$('#trUs').textContent=(m/1000*4.9).toFixed(1)+' µs';
+    const m=r.m*f;$('#trM').textContent=(m>=1000?(m/1000).toFixed(1)+' km':Math.round(m)+' m');if(r.temps){const q=f*(r.temps.length-1),a=Math.floor(q),b=Math.min(a+1,r.temps.length-1);$('#trUs').textContent=Math.round(r.temps[a]+(r.temps[b]-r.temps[a])*(q-a))+' °C'}else $('#trUs').textContent=(m/1000*4.9).toFixed(1)+' µs';
     lis.forEach((l,i)=>l.classList.toggle('done',f>=i/(lis.length-1)-1e-6||f===1));
     if(f<1)anim=requestAnimationFrame(fr);else setTimeout(()=>{dot.style.display='none'},700)};
   anim=requestAnimationFrame(fr);
@@ -859,7 +892,7 @@ function recs(){
   if(c.entry!=='dual'&&pri.resilience>=3)out.push({w:pri.resilience*2,t:'Run both vault entrances active',d:'A cut on one street no longer stops traffic.',why:'Reliability · path diversity',a:{entry:'dual'}});
   if(c.peer!=='share'&&pri.resilience>=5)out.push({w:pri.resilience*1.8,t:'Load-share with peer site CO-12',d:`Commitment rises to ${AVAIL[c.entry+'-share']}%. About ${fmtK(dE({peer:'share'}))} more a month.`,why:'Reliability',a:{peer:'share'}});
   if(c.peer==='share'&&pri.cost>=4&&pri.resilience<=3)out.push({w:pri.cost*2,t:'Move peer site to standby',d:`Saves ${fmtK(-dE({peer:'standby'}))} a month.`,why:'Cost',a:{peer:'standby'}});
-  if(c.heat!=='reuse'&&pri.sustain>=3)out.push({w:pri.sustain*2+pri.cost*.5,t:'Send heat to the district loop',d:`Warms nearby apartments, a school and a greenhouse, and earns about ${fmtK(-econ({...c,heat:'reuse'}).lines[2][1])} a month.`,why:'Sustainability · community benefit',a:{heat:'reuse'}});
+  if(c.heat!=='reuse'&&pri.sustain>=3)out.push({w:pri.sustain*2+pri.cost*.5,t:'Send heat to the district loop',d:`Warms the hospital, office tower, apartments and school, and earns about ${fmtK(-econ({...c,heat:'reuse'}).lines[2][1])} a month.`,why:'Sustainability · community benefit',a:{heat:'reuse'}});
   if(!c.gridShift&&pri.sustain>=3)out.push({w:pri.sustain*1.7,t:'Shift batch work to clean-power hours',d:'Raises renewable share to 72% and trims the power bill 5%.',why:'Sustainability · grid-friendly',a:{gridShift:true}});
   if(c.rate===400&&c.waves>=48&&(pri.speed>=4||pri.sustain>=4))out.push({w:Math.max(pri.speed,pri.sustain)*1.3,t:'Move the cloud interconnect to 800G',d:`Doubles it to ${dciTbps({...c,rate:800}).toFixed(1)} Tbps on the same strands.`,why:'Speed · Sustainability',a:{rate:800}});
   if(!c.autoscale)out.push({w:pri.speed*1.5+pri.resilience,t:'Turn on burst racks',d:'Open racks take overflow automatically above the trigger.',why:'Speed',a:{autoscale:true}});
@@ -905,6 +938,7 @@ function renderUnderground(){
   $('#entryPill').className='pill '+(dual?'good':'warn');$('#entryPill').textContent=dual?'Path diverse':'Single active path';
   $('#manholes').innerHTML=[['M1','Pine St at Main','Hospital lateral','good','Healthy'],['M2','Main St','Cloud route','good','Healthy'],['M3','5th Ave','Depot and peer routes','serious','Loss rising'],['M4','Pine St at 5th','Office lateral','good','Healthy']]
     .map(([n,w,r,k,s])=>`<li><b class="mono">${n}</b><span>${w}</span><span style="color:var(--muted)">${r}</span><span class="pill ${k}">${s}</span></li>`).join('');
+  $('#ugFlow').innerHTML=heatFlow();
   renderSplice();
 }
 $('#leasePair').addEventListener('click',()=>{pend.pairs=Math.min(4,pend.pairs+1);confirming=false;renderCtl();renderDerived();toast('Staged one more Google fiber pair.')});
@@ -939,8 +973,8 @@ function floorList(){
   const e=econ(applied);const last=hist[hist.length-1]||{u:.6,mw:1};
   const dciW=applied.pairs*applied.waves;
   return [
-    {k:'roof',lv:'Roof',name:'Heat rejection',m:[`${applied.heat==='reuse'?(e.heatMWh/730).toFixed(2)+' MW to loop':HEAT[applied.heat].n}`,'Supply 32 °C · return 45 °C'],st:['good','Normal'],
-      d:'Dry coolers and pumps carry heat from the liquid-cooled racks out of the building. On landmark buildings they sit behind parapets so the street facade stays the same.',f:[['Mode',HEAT[applied.heat].n],['PUE',e.pue.toFixed(2)],['Water',HEAT[applied.heat].water+' L/kWh']]},
+    {k:'roof',lv:'Roof',name:'Heat rejection',m:applied.heat==='reuse'?(season==='winter'?['Mostly idle in winter','Backup for the heat loop']:[`Rejecting ${(e.itKW*(1-LOOP.summer.loop)/1000).toFixed(2)} MW`,'Summer: loop needs less heat']):[`Rejecting ${(e.itKW/1000).toFixed(2)} MW`,HEAT[applied.heat].n],st:['good','Normal'],
+      d:'Dry coolers and pumps carry heat out of the building whenever the neighbors need less of it. On landmark buildings they sit behind parapets so the street facade stays the same.',f:[['Mode',HEAT[applied.heat].n],['Season',season==='winter'?'Winter':'Summer'],['PUE',e.pue.toFixed(2)],['Water',HEAT[applied.heat].water+' L/kWh']]},
     {k:'core',lv:'L8',name:'Optical core',m:[`${dciW+24} of 192 wavelengths`,`Cloud link ${dciTbps(applied).toFixed(1)} Tbps`],st:['good','Normal'],
       d:'DWDM gear splits light into dozens of wavelengths, each its own channel. Lit services start here, and the 40 km route to Google\'s cloud region leaves from here.',f:[['Google wavelengths',`${dciW} × ${applied.rate}G`],['Verizon lit',`24 × 100G`],['Encryption',ENC[applied.enc].n]]},
     ...[7,6,5,4,3].map(n=>({k:'gpu'+n,lv:'L'+n,name:'GPU hall '+n,hall:n-3,st:n===4?['warn','Filter due']:['good','Normal'],
@@ -949,6 +983,8 @@ function floorList(){
       d:'The neutral cross-connect room. A customer\'s fiber from the street lands on a patch panel, and a short jumper connects it to Google\'s cage, the cloud or Verizon\'s network.',f:[['Last connected','Hospital pair, yesterday'],['Typical link','One pair, one jumper']]},
     {k:'power',lv:'L1',name:'Power floor',m:[`${(last.mw+OTHER_RACKS*30*.7/1000).toFixed(2)} of ${SITE_MW} MW`,'UPS 2N · 48 h generator fuel'],st:['warn','UPS string B due'],
       d:'Utility switchgear, UPS batteries and transfer gear. The phone network always had backup power, so the feeds and permits already exist.',f:[['Utility feeds','A and B, 13.2 kV'],['Google reserved',`${capMW(applied).toFixed(2)} MW`],['Site limit',SITE_MW+' MW IT']]},
+    {k:'heatplant',lv:'B1',name:'Heat recovery plant',m:applied.heat==='reuse'?[`${(e.heatMWh/730).toFixed(2)} MW to the loop`,'55 °C in · 70 °C out']:['Heat reuse off','Heat goes out the roof'],st:applied.heat==='reuse'?['good',season==='winter'?'Winter mode':'Summer mode']:['warn','Off'],
+      d:'A plate heat exchanger pulls heat out of the GPU cooling loop, and heat pumps raise it to about 70 °C, hot enough for radiators and hot-water tanks next door. Building water never touches the racks.',f:[['Water from racks','≈50–60 °C'],['Loop supply','≈70 °C'],['Loop return','≈35 °C'],['Share to loop',applied.heat==='reuse'?Math.round(LOOP[season].loop*100)+'%':'0%'],['Backup','Rooftop dry coolers']]},
     {k:'vault',lv:'B1',name:'Cable vault',m:[applied.entry==='dual'?'East and west active':'East active, west standby','2 entrances, 2 streets'],st:applied.entry==='dual'?['good','Diverse']:['warn','Single active'],
       d:'Every cable enters here, through two entrances on different streets, so one backhoe can\'t cut the building off.',f:[['East','Main St'],['West','5th Ave']]}];
 }
@@ -962,7 +998,7 @@ function renderInside(){
         if(!rm.g.has(i)&&pm.g.has(i))cls+=' add';if(rm.g.has(i)&&!pm.g.has(i))cls='rack drop';racks+=`<span class="rack ${cls}"></span>`}
       viz=`<div class="racks">${racks}</div>`;
       metrics=[`${g} Google${b?` + ${b} burst`:''} · ${o} tenant`,g?`${Math.round(last.u*100)}% busy · ${(g*kwOf(applied)*last.u/1000).toFixed(2)} MW`:'No Google racks'];
-      fl.f=[['Google racks',g],['Burst racks',b],['Other tenants',o],['Open',HALL-g-o-b],['Rack power',kwOf(applied)+' kW max'],['Coolant supply','32 °C']];
+      fl.f=[['Google racks',g],['Burst racks',b],['Other tenants',o],['Open',HALL-g-o-b],['Rack power',kwOf(applied)+' kW max'],['Water out','≈55 °C']];
     }else{viz=`<div class="fviz">${fl.d.split('.')[0]}.</div>`;metrics=fl.m}
     return `<button class="floor${fl.k==='vault'?' under':''}" data-f="${fl.k}" aria-pressed="${fl.k===floorSel}" type="button"><span class="fl"><b>${fl.name}</b><span>${fl.lv}</span></span>${viz}<span class="fm"><span class="pill ${fl.st[0]}">${fl.st[1]}</span><span>${metrics[0]}</span><span>${metrics[1]}</span></span></button>`}).join('');
   renderFloorDetail();
@@ -970,7 +1006,7 @@ function renderInside(){
 function renderFloorDetail(){
   const fl=floorList().find(f=>f.k===floorSel);
   if(fl.hall!=null){const rm=rackMap(applied,burstOn);const base=fl.hall*HALL;let g=0,o=0,b=0;for(let i=base;i<base+HALL;i++){if(rm.other.has(i))o++;else if(rm.g.has(i))g++;else if(rm.b.has(i))b++}
-    fl.f=[['Google racks',g],['Burst racks',b],['Other tenants',o],['Open',HALL-g-o-b],['Rack power',kwOf(applied)+' kW max'],['Coolant supply','32 °C']];
+    fl.f=[['Google racks',g],['Burst racks',b],['Other tenants',o],['Open',HALL-g-o-b],['Rack power',kwOf(applied)+' kW max'],['Water out','≈55 °C']];
     if(fl.hall===1)fl.f.push(['Next task','Coolant filter change']);}
   $('#floorDetail').innerHTML=`<div><h3>${fl.name} · ${fl.lv}</h3><p>${fl.d}</p></div><dl class="facts">${fl.f.map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}</dl>`;
 }
@@ -1001,6 +1037,13 @@ function renderMaint(){
 }
 
 /* ---------- outside ---------- */
+function heatFlow(){
+  const on=applied.heat==='reuse';
+  const st=(v,l)=>`<div class="st"><b>${v}</b><span>${l}</span></div>`,ar='<span class="ar">→</span>';
+  return on?[st('≈55 °C','Water leaving the racks'),st('Heat exchanger','Separate building loop'),st('≈70 °C','After the heat pump'),st(Math.round(LOOP[season].loop*100)+'% of heat','Sent to neighbors, '+season),st('≈35 °C','Return to be reheated')].join(ar)
+    :st('Off','Heat reuse is off. Rooftop coolers reject all heat.');
+}
+$('#seasonSeg').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;season=b.dataset.s;try{localStorage.setItem('aic2.season',season)}catch(err){}renderKpis();renderDerived();renderTab()});
 function renderOutside(){
   const rows=ROUTE_ORDER.map(k=>{const r=ROUTES[k];const lat=liveLat(k);
     const isLocal=k!=='cloud'&&k!=='peer';
@@ -1012,11 +1055,14 @@ function renderOutside(){
   $('#cust').innerHTML=`<div class="crow head"><span>Customer</span><span>Fiber</span><span>Traffic</span><span>Latency</span><span>Status</span></div>`+rows.join('');
   const e=econ(applied);
   const sc=[['PUE',e.pue.toFixed(2),'Lower is better. New-build average about 1.4'],['Renewable share',Math.round(e.renew*100)+'%','Green power agreements and rooftop solar'],['Water',HEAT[applied.heat].water+' L/kWh','Closed-loop liquid cooling'],
-    ['Heat reused',e.heatMWh?Math.round(e.heatMWh)+' MWh/mo':'None','Sent to the district loop'],['Net carbon',(e.co2-e.avoided).toFixed(1)+' t CO₂e/mo',`${e.co2.toFixed(1)} t emitted, ${e.avoided.toFixed(1)} t avoided heating`],['Copper recycled','3.4 t','From retired copper pairs']];
+    ['Heat reused',e.heatMWh?Math.round(e.heatMWh)+' MWh/mo':'None',`Sent to the neighborhood loop, ${season}`],['Carbon emitted',e.co2.toFixed(0)+' t CO₂e/mo',e.avoided?`About ${e.avoided.toFixed(0)} t avoided in neighbors' gas boilers`:'No heat reuse credit'],['Copper recycled','3.4 t','From retired copper pairs']];
   $('#score').innerHTML=sc.map(([a,b,c])=>`<div class="mini"><span class="lbl">${a}</span><b style="font-size:18px">${b}</b><div style="font-size:11.5px;color:var(--muted);margin-top:2px">${c}</div></div>`).join('');
-  const dests=[['Apartments on 5th Ave','240 homes, winter heat',.55],['P.S. 41 school','Classrooms and hot water',.25],['Rooftop greenhouse','Year-round growing',.2]];
-  $('#heatdest').innerHTML=dests.map(([n,s,f])=>`<div class="hd"><span><b>${n}</b><br><span style="color:var(--muted);font-size:11.5px">${s}</span></span><div class="track"><div style="width:${e.heatMWh?f*100:0}%"></div></div><span class="v">${e.heatMWh?Math.round(e.heatMWh*f)+' MWh':'—'}</span></div>`).join('');
-  $('#heatNote').textContent=applied.heat==='reuse'?'Heat from Google\'s racks warms the block instead of going into the air.':'Heat reuse is off, so waste heat leaves through the roof coolers. Turn on heat reuse in Site settings to send it to the district loop.';
+  const totalMWh=e.itKW*730/1000,on=applied.heat==='reuse',L=LOOP[season];
+  $$('#seasonSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===season));
+  $('#heatflow').innerHTML=heatFlow();
+  const hrows=[...L.split.map(([n,d,f])=>[n,d,on?L.loop*f:0,'var(--heat)']),['Rooftop dry coolers','Rejected to the air',on?1-L.loop:1,'var(--muted)']];
+  $('#heatdest').innerHTML=hrows.map(([n,d,f,col])=>`<div class="hd"><span><b>${n}</b><br><span style="color:var(--muted);font-size:11.5px">${d}</span></span><div class="track"><div style="width:${f*100}%;background:${col}"></div></div><span class="v">${Math.round(totalMWh*f)} MWh</span></div>`).join('');
+  $('#heatNote').textContent=!on?'Heat reuse is off, so all the heat leaves through the roof coolers. Turn on heat reuse in Site settings to send it to the neighbors.':season==='winter'?'Winter: most of the heat flows into the loop and warms the hospital, the office tower, and the apartments and school across the street. The rooftop coolers sit mostly idle.':'Summer: buildings need less heat. The loop keeps supplying hot water, and the rooftop dry coolers reject the rest.';
 }
 
 /* ---------- costs ---------- */
