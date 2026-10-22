@@ -131,16 +131,27 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .note{margin:8px 0 0;font-size:12.5px;color:var(--ink-2)}
 
 /* block map */
-.score5{display:grid;grid-template-columns:minmax(0,1.35fr) repeat(5,minmax(0,1fr));gap:10px}
-.ns{background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
-.ns .lbl{color:var(--accent-ink);opacity:.85}
-.ns b{font-family:var(--display);font-size:34px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
-.ns span{font-size:12px;opacity:.9}
-.sm{background:var(--sunken);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:3px;min-width:0}
-.sm b{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
-.sm .t{font-size:11.5px;color:var(--muted)}
-@media (max-width:1180px){.score5{grid-template-columns:repeat(3,minmax(0,1fr))}.ns{grid-column:1/-1}}
-@media (max-width:520px){.score5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pilot{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.pilot .ph{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 14px}
+.pilot .ph h2{font-size:22px}
+.kpi5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.k5{background:var(--sunken);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.k5 .ic{width:40px;height:40px;border-radius:50%;background:var(--accent);display:grid;place-items:center;margin-bottom:4px;flex:none}
+.k5 .ic svg{width:21px;height:21px;fill:var(--accent-ink)}
+.k5 h3{font-size:16px;line-height:1.2}
+.k5 .d{font-size:12px;color:var(--muted);line-height:1.35}
+.k5 b{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:6px}
+.k5 .lv{font-size:12px;color:var(--ink-2)}
+.nsrow{display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:8px 20px;align-items:center;background:var(--accent);color:var(--accent-ink);border-radius:10px;padding:12px 16px}
+.nsrow .nl{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;opacity:.9}
+.nsrow .nv{font-family:var(--display);font-size:34px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.nsrow .nb{height:10px;border-radius:5px;background:rgba(255,255,255,.28);overflow:hidden}
+.nsrow .nb div{height:100%;background:var(--accent-ink);border-radius:5px}
+.nsrow .ns2{font-size:12.5px;opacity:.92;margin-top:6px}
+.also{font-size:12.5px;color:var(--ink-2);margin:0}
+.also button{border:0;background:none;color:var(--accent);font:inherit;font-weight:500;cursor:pointer;padding:0;text-decoration:underline}
+@media (max-width:1100px){.kpi5{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.kpi5{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi5 .k5:last-child{grid-column:1/-1}.nsrow{grid-template-columns:minmax(0,1fr)}}
 .blockwrap{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px;align-items:start}
 .map .bk{fill:var(--block);stroke:var(--line)}
 .map .st{fill:var(--street)}
@@ -327,17 +338,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   .prio{grid-template-columns:minmax(0,1fr) auto}
   .prio .sliders{grid-column:1/-1;grid-row:2}
 }
-@media (max-width:860px){.score5{display:grid;grid-template-columns:minmax(0,1.35fr) repeat(5,minmax(0,1fr));gap:10px}
-.ns{background:var(--accent);color:var(--accent-ink);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;min-width:0}
-.ns .lbl{color:var(--accent-ink);opacity:.85}
-.ns b{font-family:var(--display);font-size:34px;font-weight:600;line-height:1.05;font-variant-numeric:tabular-nums}
-.ns span{font-size:12px;opacity:.9}
-.sm{background:var(--sunken);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:3px;min-width:0}
-.sm b{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
-.sm .t{font-size:11.5px;color:var(--muted)}
-@media (max-width:1180px){.score5{grid-template-columns:repeat(3,minmax(0,1fr))}.ns{grid-column:1/-1}}
-@media (max-width:520px){.score5{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.blockwrap{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:860px){.blockwrap{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:760px){
   .rail{grid-template-columns:minmax(0,1fr)}
   .two,.vaults,.detail{grid-template-columns:minmax(0,1fr)}
@@ -390,6 +391,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     </div>
   </section>
 
+  <section class="pilot" id="pilotCard" aria-labelledby="pilotH">
+    <div class="ph"><div><span class="eyebrow">Success metrics · Chicago pilot · live</span><h2 id="pilotH">How we'll know it's working</h2></div><span class="pill good" id="pilotPill">On track</span></div>
+    <div class="kpi5" id="pilot"></div>
+    <div class="nsrow" id="northStar"></div>
+    <p class="also">Also tracked: a public sustainability scorecard per site covering energy efficiency, renewable share, water use and heat reused. <button type="button" id="toScore">Open the scorecard</button></p>
+  </section>
+
   <section class="kpis" id="kpis" aria-label="Live site summary"></section>
 
   <div class="main">
@@ -404,10 +412,6 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 
       <!-- OVERVIEW -->
       <div class="view" id="view-overview" role="tabpanel" aria-labelledby="tab-overview">
-        <section class="card" id="pilotCard">
-          <div class="card-h"><div><h2>Pilot scorecard</h2><p>How we'll know it's working: the Chicago pilot's success metrics, measured live.</p></div><span class="pill good" id="pilotPill">On track</span></div>
-          <div class="score5" id="pilot"></div>
-        </section>
         <section class="card">
           <div class="card-h">
             <div><h2>CO-07 city block</h2><p>The converted central office sits in the middle. Fiber under the streets connects it to the customers around it, to Google's cloud region and to a peer edge site.</p></div>
@@ -708,7 +712,7 @@ function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x)));const n=x/p;
 
 /* ---------- KPIs ---------- */
 function renderKpis(){
-  const last=hist[hist.length-1];if(!last)return;
+  const last=hist[hist.length-1];if(!last)return;renderPilot();
   const e=econ(applied);const u=last.u*100;
   const tile=(lbl,val,unit,pill,foot)=>`<div class="kpi"><span class="lbl">${lbl}</span><span class="val">${val}<small>${unit}</small></span>${pill}<span class="foot">${foot}</span></div>`;
   const pill=(k,t)=>`<span class="pill ${k}">${t}</span>`;
@@ -1176,31 +1180,40 @@ let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('sh
 const TABS=['overview','underground','inside','outside','costs'];
 let currentTab=(()=>{const h=(location.hash||'').slice(1);if(TABS.includes(h))return h;try{const s=localStorage.getItem('aic2.tab');if(TABS.includes(s))return s}catch(e){}return 'overview'})();
 function showTab(t){currentTab=t;TABS.forEach(k=>{$('#view-'+k).hidden=k!==t;const b=$('#tab-'+k);b.setAttribute('aria-selected',k===t);b.tabIndex=k===t?0:-1});try{localStorage.setItem('aic2.tab',t)}catch(e){}renderTab()}
+$('#toScore').addEventListener('click',()=>{showTab('outside');setTimeout(()=>$('#score').scrollIntoView({behavior:'smooth',block:'center'}),50)});
 $('.tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)showTab(b.dataset.tab)});
 $('.tabs').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;const i=TABS.indexOf(currentTab);const n=TABS[(i+(e.key==='ArrowRight'?1:TABS.length-1))%TABS.length];showTab(n);$('#tab-'+n).focus()});
+const ICONS={
+  sites:'<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4 21V3h11v6h5v12H4zm3-15v2h2V6H7zm4 0v2h2V6h-2zm-4 4v2h2v-2H7zm4 0v2h2v-2h-2zm-4 4v2h2v-2H7zm4 0v2h2v-2h-2zm6-2v2h2v-2h-2zm0 4v2h2v-2h-2z"/></svg>',
+  occ:'<svg viewBox="0 0 24 24"><path d="M11 2.05A10 10 0 1 0 21.95 13H11V2.05z"/><path d="M13 2.05V11h8.95A10 10 0 0 0 13 2.05z"/></svg>',
+  rev:'<svg viewBox="0 0 24 24"><path d="M13 2h-2v2.1C8.2 4.5 6.5 6.2 6.5 8.4c0 2.6 2.2 3.6 4.5 4.2v4.6c-1.4-.3-2.3-1.1-2.5-2.4H6.3c.2 2.5 2 4.1 4.7 4.5V22h2v-2.7c2.9-.4 4.7-2.1 4.7-4.5 0-2.7-2.3-3.7-4.7-4.3V5.9c1.1.2 1.9.9 2.1 2h2.2c-.2-2.2-1.8-3.7-4.3-4V2zm-2 4v4.1c-1.4-.4-2.2-.9-2.2-1.9 0-1.1.9-1.9 2.2-2.2zm2 7.2c1.5.4 2.4 1 2.4 2 0 1.2-1 1.9-2.4 2.1v-4.1z"/></svg>',
+  time:'<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 5h-2v6.2l4.6 2.8 1-1.7-3.6-2.2V7z"/></svg>',
+  lat:'<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 4A10 10 0 0 0 2 14c0 2 .6 3.9 1.6 5.5h16.8A10 10 0 0 0 22 14 10 10 0 0 0 12 4zm4.3 4.3-3.5 6a2 2 0 1 1-1.7-1z"/></svg>'};
 function renderPilot(){
   const last=hist[hist.length-1]||{lat:7};
   const occMW=capMW(applied)+OTHER_RACKS*30/1000;const racksSold=applied.racks+OTHER_RACKS;
   const rev=econ(applied).total+OTHER_RACKS*5200;
   const within=['hospital','depot','cell','office'].filter(k=>liveLat(k)<=ROUTES[k].sla).length;
-  const tile=(l,v,t)=>`<div class="sm"><span class="lbl">${l}</span><b>${v}</b><span class="t">${t}</span></div>`;
-  $('#pilot').innerHTML=`<div class="ns"><span class="lbl">North Star · Occupied megawatts</span><b>${occMW.toFixed(2)} MW</b><span>${Math.round(occMW/SITE_MW*100)}% of ${SITE_MW} MW at CO-07 · Google ${capMW(applied).toFixed(2)} MW</span></div>`+
-    tile('Sites converted','1','Chicago pilot live')+
-    tile('Occupancy rate',Math.round(racksSold/RACKS_TOTAL*100)+'%',`${racksSold} of ${RACKS_TOTAL} racks sold`)+
-    tile('Revenue per site',fmtK(rev),'per month, all tenants')+
-    tile('Time-to-connect','3.5 h','median, order to live cross-connect')+
-    tile('Latency achieved',within+' of 4',`routes within SLA · p50 ${last.lat.toFixed(1)} ms`);
+  const tile=(ic,h,d,v,live)=>`<div class="k5"><span class="ic" aria-hidden="true">${ICONS[ic]}</span><h3>${h}</h3><span class="d">${d}</span><b>${v}</b><span class="lv">${live}</span></div>`;
+  $('#pilot').innerHTML=
+    tile('sites','Sites converted','Central offices live as edge sites','1','CO-07 Chicago pilot')+
+    tile('occ','Occupancy rate','Share of rack and power capacity sold',Math.round(racksSold/RACKS_TOTAL*100)+'%',`${racksSold} of ${RACKS_TOTAL} racks · ${Math.round(occMW/SITE_MW*100)}% of power`)+
+    tile('rev','Revenue per site','Fiber, space, power and cross-connects combined',fmtK(rev),'per month, all tenants')+
+    tile('time','Time-to-connect','Order to live cross-connect','3.5 h','median · goal under 24 h')+
+    tile('lat','Latency achieved','Measured per route vs. SLA',within+' of 4',`routes within SLA · p50 ${last.lat.toFixed(1)} ms`);
+  $('#northStar').innerHTML=`<div><div class="nl">North Star · Occupied megawatts</div><div class="nv">${occMW.toFixed(2)} MW</div></div>
+    <div><div class="nb"><div style="width:${Math.min(100,occMW/SITE_MW*100)}%"></div></div><div class="ns2">${Math.round(occMW/SITE_MW*100)}% of ${SITE_MW} MW across converted sites (1 site) · Google ${capMW(applied).toFixed(2)} MW, other tenants ${(OTHER_RACKS*30/1000).toFixed(2)} MW</div></div>`;
   $('#pilotPill').className='pill '+(within===4?'good':'warn');$('#pilotPill').textContent=within===4?'On track':'Watch latency';
 }
 function renderTab(){
-  if(currentTab==='overview'){renderPilot();renderMap();renderTracePanel();renderLive();renderForecast();renderRecs();renderFeed()}
+  if(currentTab==='overview'){renderMap();renderTracePanel();renderLive();renderForecast();renderRecs();renderFeed()}
   else if(currentTab==='underground')renderUnderground();
   else if(currentTab==='inside'){renderInside();renderMaint()}
   else if(currentTab==='outside')renderOutside();
   else if(currentTab==='costs')renderCosts();
 }
 function renderDerived(){renderFit();renderPend();renderKpis();
-  if(currentTab==='overview'){renderPilot();renderRecs();renderForecast()}
+  if(currentTab==='overview'){renderRecs();renderForecast()}
   else if(currentTab==='underground')renderUnderground();
   else if(currentTab==='inside')renderInside();
   else if(currentTab==='costs')renderCosts();
@@ -1211,7 +1224,7 @@ function renderAll(){renderPri();renderDerived();renderLog();renderTab()}
 renderCtl();renderPri();renderFit();renderPend();renderKpis();renderLog();showTab(currentTab);
 let tick=0;
 setInterval(()=>{sample();tick++;renderKpis();$('#clock').textContent='Live · '+new Date().toLocaleTimeString('en-US',{hour12:false});
-  if(currentTab==='overview'){renderLive();updateBadges();renderPilot()}
+  if(currentTab==='overview'){renderLive();updateBadges()}
   else if(currentTab==='inside'&&tick%2===0)renderInside();
   else if(currentTab==='outside'&&tick%2===0)renderOutside();
 },2000);
